@@ -31,20 +31,20 @@
     <ClInclude Include="mirror.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="midefs.h">
-      <Filter>Header Files\misc</Filter>
-    </ClInclude>
-    <ClInclude Include="arch.h">
-      <Filter>Header Files\misc</Filter>
-    </ClInclude>
     <ClInclude Include="logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="midefs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="arch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="extensions.h">
-      <Filter>Header Files\misc</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ins.h">
-      <Filter>Header Files\misc</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -52,6 +52,18 @@
       <Filter>Source Files\i386</Filter>
     </MASM>
     <MASM Include="amd64\insamd64.asm">
+      <Filter>Source Files\amd64</Filter>
+    </MASM>
+    <MASM Include="amd64\vmxamd64.asm">
+      <Filter>Source Files\amd64</Filter>
+    </MASM>
+    <MASM Include="i386\vmxi386.asm">
+      <Filter>Source Files\i386</Filter>
+    </MASM>
+    <MASM Include="i386\svmi386.asm">
+      <Filter>Source Files\i386</Filter>
+    </MASM>
+    <MASM Include="amd64\svmamd64.asm">
       <Filter>Source Files\amd64</Filter>
     </MASM>
   </ItemGroup>
