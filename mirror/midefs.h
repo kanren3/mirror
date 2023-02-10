@@ -8,6 +8,7 @@
 #include <intrin.h>
 
 #include "arch.h"
+#include "ins.h"
 #include "extensions.h"
 
 #ifdef __cplusplus

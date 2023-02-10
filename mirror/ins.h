@@ -1,5 +1,5 @@
-#ifndef _MIRROR_H_
-#define _MIRROR_H_
+#ifndef _INS_H_
+#define _INS_H_
 
 #ifdef __cplusplus
 extern "C" {

@@ -122,6 +122,7 @@
   <ItemGroup>
     <ClInclude Include="arch.h" />
     <ClInclude Include="extensions.h" />
+    <ClInclude Include="ins.h" />
     <ClInclude Include="logger.h" />
     <ClInclude Include="mirror.h" />
     <ClInclude Include="midefs.h" />

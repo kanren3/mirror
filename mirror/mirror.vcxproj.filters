@@ -43,6 +43,9 @@
     <ClInclude Include="extensions.h">
       <Filter>Header Files\misc</Filter>
     </ClInclude>
+    <ClInclude Include="ins.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <MASM Include="i386\insi386.asm">

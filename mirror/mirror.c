@@ -1,21 +1,17 @@
 #include "midefs.h"
 #include "logger.h"
 
-VOID
-NTAPI
+VOID NTAPI
 DriverUnload(
-    __in PDRIVER_OBJECT DriverObject
-)
+    __in PDRIVER_OBJECT DriverObject)
 {
     LogUninitialize();
 }
 
-NTSTATUS
-NTAPI
+NTSTATUS NTAPI
 DriverEntry(
     __in PDRIVER_OBJECT DriverObject,
-    __in PUNICODE_STRING RegistryPath
-)
+    __in PUNICODE_STRING RegistryPath)
 {
     NTSTATUS Status = STATUS_SUCCESS;
 
