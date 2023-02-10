@@ -12,6 +12,12 @@
     <Filter Include="Header Files\misc">
       <UniqueIdentifier>{b27ef20e-750e-40f5-9eac-ad3ceb678d2e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\amd64">
+      <UniqueIdentifier>{74310893-3314-4c41-839e-69d08f457f9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\i386">
+      <UniqueIdentifier>{370d0aaf-f702-4192-8dc4-683abdcd01b0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="mirror.c">
@@ -37,5 +43,13 @@
     <ClInclude Include="extensions.h">
       <Filter>Header Files\misc</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="i386\insi386.asm">
+      <Filter>Source Files\i386</Filter>
+    </MASM>
+    <MASM Include="amd64\insamd64.asm">
+      <Filter>Source Files\amd64</Filter>
+    </MASM>
   </ItemGroup>
 </Project>
