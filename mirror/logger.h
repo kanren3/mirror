@@ -38,21 +38,16 @@ typedef struct _MESSAGE_HEADER {
     ((PMESSAGE_HEADER)((PUCHAR)(Pool) + Length))
 
 VOID NTAPI
-LogSyncPrint(
-    __in PCSTR Format,
-    __in...);
+LogSyncPrint(__in PCSTR Format, __in...);
 
 VOID NTAPI
-LogAsyncPrint(
-    __in PCSTR Format,
-    __in...);
+LogAsyncPrint(__in PCSTR Format, __in...);
 
 VOID NTAPI
 LogUninitialize();
 
 NTSTATUS NTAPI
-LogInitialize(
-    __in ULONG FlushTime);
+LogInitialize(__in ULONG FlushTime);
 
 #ifdef __cplusplus
 }
