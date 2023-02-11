@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+    void __stdcall __ins_cpuidex(int function, int subfunction, int* cpuinfo);
+
 #ifdef __cplusplus
 }
 #endif

@@ -34,17 +34,17 @@
     <ClInclude Include="logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="midefs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="arch.h">
+    <ClInclude Include="ins.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="extensions.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\misc</Filter>
     </ClInclude>
-    <ClInclude Include="ins.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="arch.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="midefs.h">
+      <Filter>Header Files\misc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
