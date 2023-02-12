@@ -8,8 +8,10 @@
 #include <intrin.h>
 
 #include "arch.h"
-#include "ins.h"
 #include "extensions.h"
+#include "ins.h"
+#include "svm.h"
+#include "vmx.h"
 
 #ifdef __cplusplus
 extern "C" {

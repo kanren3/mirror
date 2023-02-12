@@ -137,8 +137,10 @@
     <ClInclude Include="logger.h" />
     <ClInclude Include="mirror.h" />
     <ClInclude Include="midefs.h" />
+    <ClInclude Include="svm.h" />
     <ClInclude Include="svmcore.h" />
     <ClInclude Include="svmhandler.h" />
+    <ClInclude Include="vmx.h" />
     <ClInclude Include="vmxcore.h" />
     <ClInclude Include="vmxhandler.h" />
   </ItemGroup>

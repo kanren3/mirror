@@ -82,6 +82,12 @@
     <ClInclude Include="hvm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="vmx.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="svm.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <MASM Include="i386\insi386.asm">
