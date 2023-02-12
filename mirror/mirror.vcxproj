@@ -97,6 +97,9 @@
       <WppEnabled>true</WppEnabled>
       <WppTraceFunction>EventTraceMessage(LEVEL,FLAGS,MSG,...)</WppTraceFunction>
     </ClCompile>
+    <Link>
+      <ImageHasSafeExceptionHandlers />
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
