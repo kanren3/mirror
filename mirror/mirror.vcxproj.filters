@@ -26,15 +26,30 @@
     <ClCompile Include="logger.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="vmxcore.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vmxhandler.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="svmcore.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="svmhandler.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hvm.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="emulator.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mirror.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="logger.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ins.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="extensions.h">
@@ -45,6 +60,27 @@
     </ClInclude>
     <ClInclude Include="midefs.h">
       <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="emulator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ins.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="vmxcore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vmxhandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="svmcore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="svmhandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hvm.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -119,16 +119,28 @@
     <FilesToPackage Include="$(TargetPath)" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="emulator.c" />
+    <ClCompile Include="hvm.c" />
     <ClCompile Include="logger.c" />
     <ClCompile Include="mirror.c" />
+    <ClCompile Include="svmcore.c" />
+    <ClCompile Include="svmhandler.c" />
+    <ClCompile Include="vmxcore.c" />
+    <ClCompile Include="vmxhandler.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="arch.h" />
+    <ClInclude Include="emulator.h" />
     <ClInclude Include="extensions.h" />
+    <ClInclude Include="hvm.h" />
     <ClInclude Include="ins.h" />
     <ClInclude Include="logger.h" />
     <ClInclude Include="mirror.h" />
     <ClInclude Include="midefs.h" />
+    <ClInclude Include="svmcore.h" />
+    <ClInclude Include="svmhandler.h" />
+    <ClInclude Include="vmxcore.h" />
+    <ClInclude Include="vmxhandler.h" />
   </ItemGroup>
   <ItemGroup>
     <MASM Include="amd64\insamd64.asm">
