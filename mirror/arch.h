@@ -5,7 +5,16 @@
 extern "C" {
 #endif
 
-#define MSR_EFER 0xC0000080
+#define MSR_FEATURE_CONTROL 0x0000003A // Only Intel
+#define MSR_EFER            0xC0000080
+#define MSR_VM_CR           0xC0010114 // Only AMD
+
+typedef struct _CPU_INFO {
+    ULONG Eax;
+    ULONG Ebx;
+    ULONG Ecx;
+    ULONG Edx;
+} CPU_INFO, *PCPU_INFO;
 
 #ifndef _WIN64
 typedef struct _KDESCRIPTOR {
