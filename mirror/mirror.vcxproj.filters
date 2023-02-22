@@ -52,7 +52,7 @@
     <ClInclude Include="logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="extensions.h">
+    <ClInclude Include="ext.h">
       <Filter>Header Files\misc</Filter>
     </ClInclude>
     <ClInclude Include="arch.h">

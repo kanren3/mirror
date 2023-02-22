@@ -32,6 +32,9 @@ __MACHINEX86(unsigned __int64 __stdcall __ins_rdtsc(void))
 __MACHINEX64(unsigned __int64 __stdcall __ins_rdtscp(unsigned int aux))
 __MACHINEX86(unsigned __int64 __stdcall __ins_rdtscp(unsigned int aux))
 
+__MACHINEX64(unsigned __int64 __stdcall __ins_xgetbv(unsigned int xcr))
+__MACHINEX86(unsigned __int64 __stdcall __ins_xgetbv(unsigned int xcr))
+
 __MACHINEX64(void __stdcall __ins_xsetbv(unsigned int xcr, unsigned __int64 value))
 __MACHINEX86(void __stdcall __ins_xsetbv(unsigned int xcr, unsigned __int64 value))
 

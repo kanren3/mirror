@@ -8,7 +8,7 @@
 #include <intrin.h>
 
 #include "arch.h"
-#include "extensions.h"
+#include "ext.h"
 #include "ins.h"
 #include "svm.h"
 #include "vmx.h"

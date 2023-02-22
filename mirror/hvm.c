@@ -6,12 +6,6 @@ ULONG HvProcessorNumber;
 ULONG HvProcessorType;
 
 ULONG NTAPI
-HvGetProcessorNumber()
-{
-    return KeQueryActiveProcessorCountEx(ALL_PROCESSOR_GROUPS);
-}
-
-ULONG NTAPI
 HvGetProcessorType()
 {
     ULONG i, Feature[4];
@@ -92,7 +86,7 @@ HvInitializeProcessor()
         return STATUS_NOT_SUPPORTED;
     }
 
-    HvProcessorNumber = HvGetProcessorNumber();
+    HvProcessorNumber = KeQueryActiveProcessorCountEx(ALL_PROCESSOR_GROUPS);
 
     return STATUS_SUCCESS;
 }

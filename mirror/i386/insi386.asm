@@ -268,6 +268,16 @@ cPublicProc ___ins_rdtscp, 1
 
 stdENDP ___ins_rdtscp
 
+cPublicProc ___ins_xgetbv, 1
+
+        mov ecx, [esp + 4]
+
+        xsetbv
+
+        stdRET ___ins_xgetbv
+
+stdENDP ___ins_xgetbv
+
 cPublicProc ___ins_xsetbv, 3
 
         mov ecx, [esp + 4]

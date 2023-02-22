@@ -131,7 +131,7 @@
   <ItemGroup>
     <ClInclude Include="arch.h" />
     <ClInclude Include="emulator.h" />
-    <ClInclude Include="extensions.h" />
+    <ClInclude Include="ext.h" />
     <ClInclude Include="hvm.h" />
     <ClInclude Include="ins.h" />
     <ClInclude Include="logger.h" />

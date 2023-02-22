@@ -218,6 +218,17 @@ Finish:
 
     LEAF_END __ins_rdtscp, _TEXT$00
 
+    LEAF_ENTRY __ins_xgetbv, _TEXT$00
+
+        xgetbv
+
+        shl rdx, 20h
+        or rax, rdx
+
+        ret
+
+    LEAF_END __ins_xgetbv, _TEXT$00
+
     LEAF_ENTRY __ins_xsetbv, _TEXT$00
 
         mov eax, edx

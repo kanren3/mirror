@@ -1,5 +1,5 @@
-#ifndef _EXTENSIONS_H_
-#define _EXTENSIONS_H_
+#ifndef _EXT_H_
+#define _EXT_H_
 
 #ifdef __cplusplus
 extern "C" {
