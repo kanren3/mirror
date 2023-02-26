@@ -44,6 +44,9 @@
     <ClCompile Include="emulator.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="features.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mirror.h">
@@ -87,6 +90,9 @@
     </ClInclude>
     <ClInclude Include="svm.h">
       <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="features.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

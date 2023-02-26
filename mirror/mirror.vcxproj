@@ -120,6 +120,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="emulator.c" />
+    <ClCompile Include="features.c" />
     <ClCompile Include="hvm.c" />
     <ClCompile Include="logger.c" />
     <ClCompile Include="mirror.c" />
@@ -132,6 +133,7 @@
     <ClInclude Include="arch.h" />
     <ClInclude Include="emulator.h" />
     <ClInclude Include="ext.h" />
+    <ClInclude Include="features.h" />
     <ClInclude Include="hvm.h" />
     <ClInclude Include="ins.h" />
     <ClInclude Include="logger.h" />
