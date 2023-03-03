@@ -5,9 +5,9 @@
 extern "C" {
 #endif
 
-#define MACHINE_NONE  0x00000000
-#define MACHINE_INTEL 0x00000001
-#define MACHINE_AMD   0x00000002
+#define PROCESSOR_OTHERS 0x00000000
+#define PROCESSOR_INTEL  0x00000001
+#define PROCESSOR_AMD    0x00000002
 
 #define VMX_FEATURE_SUPPORT 0x00000001
 #define VMX_FEATURE_ENABLE  0x00000002
@@ -18,29 +18,63 @@ extern "C" {
 #define SVM_FEATURE_VMCB_CLEAN    0x00000008
 #define SVM_FEATURE_FLUSH_BY_ASID 0x00000010
 
-ULONG NTAPI
-FeGetMachineType();
+typedef struct _XFEATURE_INFO {
+    ULONG EnabledSizeMax;
+    ULONG SupportedSizeMax;
+    ULONG SupportedLowMask;
+    ULONG SupportedUpperMask;
+} XFEATURE_INFO, *PXFEATURE_INFO;
+
+typedef struct _VMX_FEATURES {
+    ULONG Flags;
+
+    VMX_BASIC BasicInfo;
+
+    ULARGE_INTEGER PinFixed;
+    ULARGE_INTEGER PrimaryFixed;
+    ULARGE_INTEGER SecondaryFixed;
+    ULARGE_INTEGER ExitFixed;
+    ULARGE_INTEGER EntryFixed;
+
+} VMX_FEATURES, *PVMX_FEATURES;
+
+typedef struct _VMX_FEATURES {
+    ULONG Flags;
+
+    VMX_BASIC BasicInfo;
+
+    ULARGE_INTEGER PinFixed;
+    ULARGE_INTEGER PrimaryFixed;
+    ULARGE_INTEGER SecondaryFixed;
+    ULARGE_INTEGER ExitFixed;
+    ULARGE_INTEGER EntryFixed;
+
+} VMX_FEATURES, *PVMX_FEATURES;
+
 
 ULONG NTAPI
-FeGetXFeatureEnabledSizeMax();
+GetVmManagerType();
 
 ULONG NTAPI
-FeGetXFeatureSupportedSizeMax();
+GetXFeatureEnabledSizeMax();
 
 ULONG NTAPI
-FeGetXFeatureSupportedLowMask();
+GetXFeatureSupportedSizeMax();
 
 ULONG NTAPI
-FeGetXFeatureSupportedUpperMask();
+GetXFeatureSupportedLowMask();
 
 ULONG NTAPI
-FeGetVmxFeature();
+GetXFeatureSupportedUpperMask();
 
 ULONG NTAPI
-FeGetSvmFeature();
+GetVmxFeature();
 
 ULONG NTAPI
-FeGetSvmAsidNumber();
+GetSvmFeature();
+
+ULONG NTAPI
+GetSvmAsidNumber();
 
 #ifdef __cplusplus
 }

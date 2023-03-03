@@ -47,6 +47,9 @@
     <ClCompile Include="features.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="common.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mirror.h">
@@ -61,7 +64,7 @@
     <ClInclude Include="arch.h">
       <Filter>Header Files\misc</Filter>
     </ClInclude>
-    <ClInclude Include="midefs.h">
+    <ClInclude Include="idefs.h">
       <Filter>Header Files\misc</Filter>
     </ClInclude>
     <ClInclude Include="emulator.h">
@@ -92,6 +95,9 @@
       <Filter>Header Files\misc</Filter>
     </ClInclude>
     <ClInclude Include="features.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

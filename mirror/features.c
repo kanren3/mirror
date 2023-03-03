@@ -1,14 +1,14 @@
-#include "midefs.h"
+#include "idefs.h"
 #include "features.h"
 
 ULONG NTAPI
-FeGetMachineType()
+FeaGetProcessorType()
 {
     ULONG i, Feature[4];
 
     ULONG Selector[][4] = {
-        { 0x756E6547, 0x6C65746E, 0x49656E69, MACHINE_INTEL },
-        { 0x68747541, 0x444D4163, 0x69746E65, MACHINE_AMD }
+        { 0x756E6547, 0x6C65746E, 0x49656E69, PROCESSOR_INTEL },
+        { 0x68747541, 0x444D4163, 0x69746E65, PROCESSOR_AMD }
     };
 
     __ins_cpuidex(0x00000000, 0, &Feature[0]);
@@ -19,43 +19,27 @@ FeGetMachineType()
         }
     }
 
-    return MACHINE_NONE;
+    return PROCESSOR_OTHERS;
 }
 
-ULONG NTAPI
-FeGetXFeatureEnabledSizeMax()
+VOID NTAPI
+FeaGetXFeatureInfo(
+    __out PXFEATURE_INFO XFeatureInfo)
 {
     CPU_INFO CpuInfo;
+
     __ins_cpuidex(0x0000000D, 0, &CpuInfo.Eax);
-    return CpuInfo.Ebx;
+
+    XFeatureInfo->EnabledSizeMax = CpuInfo.Ebx;
+    XFeatureInfo->SupportedSizeMax = CpuInfo.Ecx;
+    XFeatureInfo->SupportedLowMask = CpuInfo.Eax;
+    XFeatureInfo->SupportedUpperMask = CpuInfo.Edx;
 }
 
-ULONG NTAPI
-FeGetXFeatureSupportedSizeMax()
-{
-    CPU_INFO CpuInfo;
-    __ins_cpuidex(0x0000000D, 0, &CpuInfo.Eax);
-    return CpuInfo.Ecx;
-}
+
 
 ULONG NTAPI
-FeGetXFeatureSupportedLowMask()
-{
-    CPU_INFO CpuInfo;
-    __ins_cpuidex(0x0000000D, 0, &CpuInfo.Eax);
-    return CpuInfo.Eax;
-}
-
-ULONG NTAPI
-FeGetXFeatureSupportedUpperMask()
-{
-    CPU_INFO CpuInfo;
-    __ins_cpuidex(0x0000000D, 0, &CpuInfo.Eax);
-    return CpuInfo.Edx;
-}
-
-ULONG NTAPI
-FeGetVmxFeature()
+FeaGetVmxFeature()
 {
     ULONG Feature = 0;
     CPU_INFO CpuInfo;
@@ -75,7 +59,7 @@ FeGetVmxFeature()
 }
 
 ULONG NTAPI
-FeGetSvmFeature()
+FeaGetSvmFeature()
 {
     ULONG Feature = 0;
     CPU_INFO CpuInfo;
@@ -108,9 +92,11 @@ FeGetSvmFeature()
 }
 
 ULONG NTAPI
-FeGetSvmAsidNumber()
+FeaGetSvmAsidNumber()
 {
     CPU_INFO CpuInfo;
+
     __ins_cpuidex(0x80000001, 0, &CpuInfo.Eax);
+
     return CpuInfo.Ebx;
 }

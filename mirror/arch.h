@@ -346,6 +346,7 @@ typedef struct DECLSPEC_ALIGN(16) _GUEST_CONTEXT {
             ULONG64 Dr7;
         };
     };
+
 } GUEST_CONTEXT, *PGUEST_CONTEXT;
 
 C_ASSERT(FIELD_OFFSET(GUEST_CONTEXT, Rax) == 0x0);
