@@ -8,27 +8,27 @@ extern "C" {
 #define VMM_STATE_ROOT  0x00000001
 #define VMM_STATE_GUEST 0x00000002
 
+typedef struct _PAGE_DIRECTORY {
+    PVOID DirectoryPointer;
+    PHYSICAL_ADDRESS DirectoryBase;
+} PAGE_DIRECTORY, *PPAGE_DIRECTORY;
+
 typedef struct _HVM_MANAGER {
-    union {
-        PSVM_MANAGER Svm;
-        PVMX_MANAGER Vmx;
-    };
-
-    ULONG ManagerState;
-    ULONG ManagerType;
-
+    ULONG CallKey;
     ULONG ProcessorNumber;
+    ULONG ProcessorType;
 
-    ULONG XFeatureEnabledSizeMax;
-    ULONG XFeatureSupportedSizeMax;
-    ULONG XFeatureSupportedLowMask;
-    ULONG XFeatureSupportedUpperMask;
+    PVOID ControlDomain;
 
-    ULONG_PTR RootDirectoryTableBase;
+    PAGE_DIRECTORY HostPageDirectory;
 } HVM_MANAGER, *PHVM_MANAGER;
 
 NTSTATUS NTAPI
-HvmInitializeManager();
+HvmInitialize(
+    __in ULONG CallKey);
+
+VOID NTAPI
+HvmUninitialize();
 
 #ifdef __cplusplus
 }

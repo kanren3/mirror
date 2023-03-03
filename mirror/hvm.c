@@ -2,42 +2,107 @@
 #include "logger.h"
 #include "common.h"
 #include "features.h"
+#include "svm.h"
+#include "vmx.h"
 #include "hvm.h"
 
-typedef struct _SVM_DOMAIN {
-    PUCHAR Vmcb;
-    PUCHAR Vmhs;
-    PUCHAR VmmStack;
-    PUCHAR MsrBitmap;
-    PUCHAR IoBitmap;
-    PUCHAR PageDirectory;
-    PUCHAR XSaveArea;
-
-    KDESCRIPTOR Gdtr;
-    KDESCRIPTOR Idtr;
-
-    ULONG_PTR Cr0;
-    ULONG_PTR Cr3;
-    ULONG_PTR Cr4;
-} SVM_DOMAIN, *PSVM_DOMAIN;
-
-typedef struct _HVM_MANAGER {
-    union {
-        PVOID SvmDomain;
-        PVOID VmxDomain;
-    };
-
-    ULONG ProcessorNumber;
-    ULONG MachineType;
-    ULONG ControlKey;
-} HVM_MANAGER, *PHVM_MANAGER;
-
-
-PHVM_MANAGER HvmVirtualMachineManager = NULL;
+PHVM_MANAGER HvmGlobalManager = NULL;
 
 NTSTATUS NTAPI
-HvmInitialize()
+HvmCreateHostPageDirectory(
+    __out PPAGE_DIRECTORY PageDirectory)
 {
+    PVOID RootDirectoryPointer;
+    PHYSICAL_ADDRESS RootDirectoryBase;
+
+    RootDirectoryBase.QuadPart = CmGetDirectoryTableBase(PsInitialSystemProcess) & ~0xFFF;
+
+    RootDirectoryPointer = MmGetVirtualForPhysical(RootDirectoryBase);
+
+    if (NULL == RootDirectoryPointer) {
+        return STATUS_UNSUCCESSFUL;
+    }
+
+    PageDirectory->DirectoryPointer = CmAllocateContiguousMemory(PAGE_SIZE);
+
+    if (NULL == PageDirectory->DirectoryPointer) {
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    PageDirectory->DirectoryBase = MmGetPhysicalAddress(PageDirectory->DirectoryPointer);
+
+    RtlCopyMemory(PageDirectory->DirectoryPointer, RootDirectoryPointer, PAGE_SIZE);
 
     return STATUS_SUCCESS;
+}
+
+VOID NTAPI
+HvmDestroyHostPageDirectory(
+    __in PPAGE_DIRECTORY PageDirectory)
+{
+    CmFreeContiguousMemory(PageDirectory->DirectoryPointer);
+}
+
+NTSTATUS NTAPI
+HvmInitialize(
+    __in ULONG CallKey)
+{
+    NTSTATUS Status;
+    PHVM_MANAGER Manager;
+
+    Manager = CmAllocateNonPagedMemory(sizeof(HVM_MANAGER));
+
+    if (NULL == Manager) {
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    Status = HvmCreateHostPageDirectory(&Manager->HostPageDirectory);
+
+    if (FALSE == NT_SUCCESS(Status)) {
+
+        CmFreeNonPagedMemory(Manager);
+
+        return Status;
+    }
+
+    Manager->ProcessorType = FeaGetProcessorType();
+
+    if (PROCESSOR_OTHERS == Manager->ProcessorType) {
+
+        HvmDestroyHostPageDirectory(&Manager->HostPageDirectory);
+        CmFreeNonPagedMemory(Manager);
+
+        return STATUS_NOT_SUPPORTED;
+    }
+
+    if (PROCESSOR_AMD == Manager->ProcessorType) {
+        //
+    }
+    else {
+        //
+    }
+
+    if (NULL == Manager->ControlDomain) {
+
+        HvmDestroyHostPageDirectory(&Manager->HostPageDirectory);
+        CmFreeNonPagedMemory(Manager);
+
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    Manager->CallKey = CallKey;
+    Manager->ProcessorNumber = KeQueryActiveProcessorCountEx(ALL_PROCESSOR_GROUPS);
+
+    HvmGlobalManager = Manager;
+
+    return STATUS_SUCCESS;
+}
+
+VOID NTAPI
+HvmUninitialize()
+{
+    if (NULL != HvmGlobalManager) {
+        HvmDestroyHostPageDirectory(&HvmGlobalManager->HostPageDirectory);
+        CmFreeNonPagedMemory(HvmGlobalManager);
+    }
 }

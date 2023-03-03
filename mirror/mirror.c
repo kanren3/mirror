@@ -7,6 +7,7 @@ DriverUnload(
     __in PDRIVER_OBJECT DriverObject)
 {
     LogUninitialize();
+    HvmUninitialize();
 }
 
 NTSTATUS NTAPI
@@ -18,15 +19,16 @@ DriverEntry(
 
     DriverObject->DriverUnload = DriverUnload;
 
-    Status = HvInitializeProcessor();
+    Status = LogInitialize(1);
 
     if (FALSE == NT_SUCCESS(Status)) {
         return Status;
     }
 
-    Status = LogInitialize(1);
+    Status = HvmInitialize(0x11223344);
 
     if (FALSE == NT_SUCCESS(Status)) {
+        LogUninitialize();
         return Status;
     }
 

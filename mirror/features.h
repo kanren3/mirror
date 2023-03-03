@@ -25,56 +25,8 @@ typedef struct _XFEATURE_INFO {
     ULONG SupportedUpperMask;
 } XFEATURE_INFO, *PXFEATURE_INFO;
 
-typedef struct _VMX_FEATURES {
-    ULONG Flags;
-
-    VMX_BASIC BasicInfo;
-
-    ULARGE_INTEGER PinFixed;
-    ULARGE_INTEGER PrimaryFixed;
-    ULARGE_INTEGER SecondaryFixed;
-    ULARGE_INTEGER ExitFixed;
-    ULARGE_INTEGER EntryFixed;
-
-} VMX_FEATURES, *PVMX_FEATURES;
-
-typedef struct _VMX_FEATURES {
-    ULONG Flags;
-
-    VMX_BASIC BasicInfo;
-
-    ULARGE_INTEGER PinFixed;
-    ULARGE_INTEGER PrimaryFixed;
-    ULARGE_INTEGER SecondaryFixed;
-    ULARGE_INTEGER ExitFixed;
-    ULARGE_INTEGER EntryFixed;
-
-} VMX_FEATURES, *PVMX_FEATURES;
-
-
 ULONG NTAPI
-GetVmManagerType();
-
-ULONG NTAPI
-GetXFeatureEnabledSizeMax();
-
-ULONG NTAPI
-GetXFeatureSupportedSizeMax();
-
-ULONG NTAPI
-GetXFeatureSupportedLowMask();
-
-ULONG NTAPI
-GetXFeatureSupportedUpperMask();
-
-ULONG NTAPI
-GetVmxFeature();
-
-ULONG NTAPI
-GetSvmFeature();
-
-ULONG NTAPI
-GetSvmAsidNumber();
+FeaGetProcessorType();
 
 #ifdef __cplusplus
 }
