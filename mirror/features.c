@@ -22,6 +22,12 @@ FeaGetProcessorType()
     return PROCESSOR_OTHERS;
 }
 
+ULONG NTAPI
+FeaGetProcessorNumber()
+{
+    return KeQueryActiveProcessorCountEx(ALL_PROCESSOR_GROUPS);
+}
+
 VOID NTAPI
 FeaGetXFeatureInfo(
     __out PXFEATURE_INFO XFeatureInfo)

@@ -38,7 +38,7 @@
     <ClCompile Include="svmhandler.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="hvm.c">
+    <ClCompile Include="thunk.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="emulator.c">
@@ -85,7 +85,7 @@
     <ClInclude Include="svmhandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="hvm.h">
+    <ClInclude Include="thunk.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="vmx.h">

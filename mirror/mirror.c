@@ -1,13 +1,13 @@
 #include "idefs.h"
 #include "logger.h"
-#include "hvm.h"
+#include "thunk.h"
 
 VOID NTAPI
 DriverUnload(
     __in PDRIVER_OBJECT DriverObject)
 {
+    TuUninitialize();
     LogUninitialize();
-    HvmUninitialize();
 }
 
 NTSTATUS NTAPI
@@ -25,7 +25,7 @@ DriverEntry(
         return Status;
     }
 
-    Status = HvmInitialize(0x11223344);
+    Status = TuInitialize();
 
     if (FALSE == NT_SUCCESS(Status)) {
         LogUninitialize();

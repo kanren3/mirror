@@ -28,6 +28,9 @@ typedef struct _XFEATURE_INFO {
 ULONG NTAPI
 FeaGetProcessorType();
 
+ULONG NTAPI
+FeaGetProcessorNumber();
+
 #ifdef __cplusplus
 }
 #endif
