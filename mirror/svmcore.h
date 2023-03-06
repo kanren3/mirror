@@ -25,6 +25,12 @@ typedef struct _SVM_DOMAIN {
     ULONGLONG Features;
 } SVM_DOMAIN, *PSVM_DOMAIN;
 
+NTSTATUS NTAPI
+SvmTaskDispatcher(
+    __in PSVM_DOMAIN Domain,
+    __in ULONG TaskCode,
+    __inout_opt PVOID Context);
+
 #ifdef __cplusplus
 }
 #endif

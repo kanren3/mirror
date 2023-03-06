@@ -6,6 +6,7 @@ VOID NTAPI
 DriverUnload(
     __in PDRIVER_OBJECT DriverObject)
 {
+    TuGenericCall(TASK_SHUTDOWN, NULL);
     TuUninitialize();
     LogUninitialize();
 }
@@ -32,5 +33,6 @@ DriverEntry(
         return Status;
     }
 
+    TuGenericCall(TASK_STARTUP, NULL);
     return STATUS_SUCCESS;
 }
