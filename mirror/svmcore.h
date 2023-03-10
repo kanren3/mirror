@@ -11,7 +11,6 @@ typedef struct _SVM_DOMAIN {
     PUCHAR VmmStack;
     PUCHAR MsrBitmap;
     PUCHAR IoBitmap;
-    PUCHAR PageDirectory;
     PUCHAR Tss;
     PUCHAR XSaveArea;
 
@@ -24,6 +23,15 @@ typedef struct _SVM_DOMAIN {
 
     ULONGLONG Features;
 } SVM_DOMAIN, *PSVM_DOMAIN;
+
+VOID NTAPI
+SvmUnprepareDomainSpace(
+    __in PSVM_DOMAIN Domain,
+    __in ULONG Number);
+
+PSVM_DOMAIN NTAPI
+SvmPrepareDomainSpace(
+    __in ULONG Number);
 
 NTSTATUS NTAPI
 SvmTaskDispatcher(

@@ -32,6 +32,15 @@ typedef struct _VMX_DOMAIN {
     ULONGLONG Features;
 } VMX_DOMAIN, *PVMX_DOMAIN;
 
+VOID NTAPI
+VmxUnprepareDomainSpace(
+    __in PVMX_DOMAIN Domain,
+    __in ULONG Number);
+
+PVMX_DOMAIN NTAPI
+VmxPrepareDomainSpace(
+    __in ULONG Number);
+
 NTSTATUS NTAPI
 VmxTaskDispatcher(
     __in PVMX_DOMAIN Domain,

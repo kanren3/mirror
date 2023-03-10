@@ -13,7 +13,7 @@ PVOID TuGenericDomain;
 PVOID TuPageDirectoryPointer;
 
 NTSTATUS NTAPI
-TuBuildHostPageDirectory(
+TuBuildPageDirectory(
     __out PVOID DirectoryPointer)
 {
     PVOID RootDirectoryPointer;
@@ -40,10 +40,14 @@ TuDpcDispatcher(
     __in PVOID SystemArgument2)
 {
     if (PROCESSOR_AMD == TuProcessorType) {
-        Task->Status = SvmTaskDispatcher(TuGenericDomain, Task->TaskCode, Task->Context);
+        Task->Status = SvmTaskDispatcher(TuGenericDomain,
+                                         Task->TaskCode,
+                                         Task->Context);
     }
     else {
-        Task->Status = VmxTaskDispatcher(TuGenericDomain, Task->TaskCode, Task->Context);
+        Task->Status = VmxTaskDispatcher(TuGenericDomain,
+                                         Task->TaskCode,
+                                         Task->Context);
     }
 
     KeSetEvent(Event, LOW_PRIORITY, FALSE);
@@ -54,36 +58,36 @@ TuGenericCall(
     __in ULONG TaskCode,
     __inout_opt PVOID Context)
 {
+    THUNK_TASK ThunkTask;
     ULONG i;
-    KDPC Dpc;
     KEVENT Event;
-    THUNK_TASK Task;
+    KDPC Dpc;
     PROCESSOR_NUMBER Number;
 
-    Task.TaskCode = TaskCode;
-    Task.Context = Context;
-    Task.Status = STATUS_SUCCESS;
+    ThunkTask.TaskCode = TaskCode;
+    ThunkTask.Context = Context;
+    ThunkTask.Status = STATUS_SUCCESS;
 
-    if (NULL != TuGenericDomain) {
-        KeInitializeEvent(&Event, NotificationEvent, FALSE);
-        
-        for (i = 0; i < TuProcessorNumber; i++) {
-            KeGetProcessorNumberFromIndex(i, &Number);
-            KeClearEvent(&Event);
-
-            KeInitializeDpc(&Dpc, TuDpcDispatcher, &Task);
-            KeSetTargetProcessorDpcEx(&Dpc, &Number);
-            KeSetImportanceDpc(&Dpc, HighImportance);
-
-            if (FALSE != KeInsertQueueDpc(&Dpc, &Event, NULL)) {
-                KeWaitForSingleObject(&Event, Executive, KernelMode, FALSE, NULL);
-            }
-        }
-
-        return Task.Status;
+    if (NULL == TuGenericDomain) {
+        return STATUS_MEMORY_NOT_ALLOCATED;
     }
 
-    return STATUS_MEMORY_NOT_ALLOCATED;
+    KeInitializeEvent(&Event, NotificationEvent, FALSE);
+
+    for (i = 0; i < TuProcessorNumber; i++) {
+        KeGetProcessorNumberFromIndex(i, &Number);
+        KeClearEvent(&Event);
+
+        KeInitializeDpc(&Dpc, TuDpcDispatcher, &ThunkTask);
+        KeSetTargetProcessorDpcEx(&Dpc, &Number);
+        KeSetImportanceDpc(&Dpc, HighImportance);
+
+        if (FALSE != KeInsertQueueDpc(&Dpc, &Event, NULL)) {
+            KeWaitForSingleObject(&Event, Executive, KernelMode, FALSE, NULL);
+        }
+    }
+
+    return ThunkTask.Status;
 }
 
 NTSTATUS NTAPI
@@ -101,40 +105,52 @@ TuInitialize()
 
     TuPageDirectoryPointer = CmAllocateContiguousMemory(PAGE_SIZE);
 
-    if (NULL == TuPageDirectoryPointer) {
-        return STATUS_INSUFFICIENT_RESOURCES;
-    }
+    if (NULL != TuPageDirectoryPointer) {
+        Status = TuBuildPageDirectory(TuPageDirectoryPointer);
 
-    Status = TuBuildHostPageDirectory(TuPageDirectoryPointer);
+        if (FALSE != NT_SUCCESS(Status)) {
 
-    if (FALSE == NT_SUCCESS(Status)) {
+            if (PROCESSOR_AMD == TuProcessorType) {
+                TuGenericDomain = SvmPrepareDomainSpace(TuProcessorNumber);
+            }
+            else {
+                TuGenericDomain = VmxPrepareDomainSpace(TuProcessorNumber);
+            }
+
+            if (NULL != TuGenericDomain) {
+                return STATUS_SUCCESS;
+            }
+            else {
+                Status = STATUS_INSUFFICIENT_RESOURCES;
+            }
+        }
+
         CmFreeContiguousMemory(TuPageDirectoryPointer);
-        return Status;
-    }
-
-    if (PROCESSOR_AMD == TuProcessorType) {
-        TuGenericDomain = CmAllocateNonPagedMemory(TuProcessorNumber * sizeof(SVM_DOMAIN));
+        TuPageDirectoryPointer = NULL;
     }
     else {
-        TuGenericDomain = CmAllocateNonPagedMemory(TuProcessorNumber * sizeof(VMX_DOMAIN));
+        Status = STATUS_INSUFFICIENT_RESOURCES;
     }
 
-    if (NULL == TuGenericDomain) {
-        CmFreeContiguousMemory(TuPageDirectoryPointer);
-        return STATUS_INSUFFICIENT_RESOURCES;
-    }
-
-    return Status;
+    return STATUS_SUCCESS;
 }
 
 VOID NTAPI
 TuUninitialize()
 {
-    if (NULL != TuPageDirectoryPointer) {
-        CmFreeContiguousMemory(TuPageDirectoryPointer);
-    }
-
     if (NULL != TuGenericDomain) {
-        CmFreeNonPagedMemory(TuGenericDomain);
+        if (PROCESSOR_AMD == TuProcessorType) {
+            SvmUnprepareDomainSpace(TuGenericDomain, TuProcessorNumber);
+        }
+        else {
+            VmxUnprepareDomainSpace(TuGenericDomain, TuProcessorNumber);
+        }
+
+        TuGenericDomain = NULL;
+
+        if (NULL != TuPageDirectoryPointer) {
+            CmFreeContiguousMemory(TuPageDirectoryPointer);
+            TuPageDirectoryPointer = NULL;
+        }
     }
 }
