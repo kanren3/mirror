@@ -6,7 +6,8 @@
 
 VOID NTAPI
 SvmUnprepareDomainSpace(
-    __in PSVM_DOMAIN Domain)
+    __in PSVM_DOMAIN Domain
+)
 {
     if (NULL != Domain->Vmcb) {
         CmFreeContiguousMemory(Domain->Vmcb);
@@ -47,7 +48,8 @@ SvmUnprepareDomainSpace(
 
 NTSTATUS NTAPI
 SvmPrepareDomainSpace(
-    __in PSVM_DOMAIN Domain)
+    __in PSVM_DOMAIN Domain
+)
 {
     Domain->Vmcb = CmAllocateContiguousMemory(PAGE_SIZE);
 
@@ -149,7 +151,8 @@ Cleanup:
 VOID NTAPI
 SvmFreeDomain(
     __in ULONG Number,
-    __in PSVM_DOMAIN Domain)
+    __in PSVM_DOMAIN Domain
+)
 {
     ULONG Index;
 
@@ -162,7 +165,8 @@ SvmFreeDomain(
 
 PSVM_DOMAIN NTAPI
 SvmAllocateDomain(
-    __in ULONG Number)
+    __in ULONG Number
+)
 {
     NTSTATUS Status;
     PSVM_DOMAIN Domain;
@@ -200,7 +204,8 @@ NTSTATUS NTAPI
 SvmTaskDispatcher(
     __in PSVM_DOMAIN Domain,
     __in ULONG TaskCode,
-    __inout_opt PVOID Context)
+    __inout_opt PVOID Context
+)
 {
     NTSTATUS Status;
 

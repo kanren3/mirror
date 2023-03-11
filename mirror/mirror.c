@@ -4,7 +4,8 @@
 
 VOID NTAPI
 DriverUnload(
-    __in PDRIVER_OBJECT DriverObject)
+    __in PDRIVER_OBJECT DriverObject
+)
 {
     TuGenericCall(TASK_SHUTDOWN, NULL);
     TuUninitialize();
@@ -14,7 +15,8 @@ DriverUnload(
 NTSTATUS NTAPI
 DriverEntry(
     __in PDRIVER_OBJECT DriverObject,
-    __in PUNICODE_STRING RegistryPath)
+    __in PUNICODE_STRING RegistryPath
+)
 {
     NTSTATUS Status = STATUS_SUCCESS;
 

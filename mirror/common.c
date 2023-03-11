@@ -3,7 +3,8 @@
 
 PVOID NTAPI
 CmAllocateNonPagedMemory(
-    __in SIZE_T NumberOfBytes)
+    __in SIZE_T NumberOfBytes
+)
 {
     PVOID Pointer = NULL;
 
@@ -20,14 +21,16 @@ CmAllocateNonPagedMemory(
 
 VOID NTAPI
 CmFreeNonPagedMemory(
-    __in PVOID Pointer)
+    __in PVOID Pointer
+)
 {
     ExFreePoolWithTag(Pointer, 'mmoC');
 }
 
 PVOID NTAPI
 CmAllocateContiguousMemory(
-    __in SIZE_T NumberOfBytes)
+    __in SIZE_T NumberOfBytes
+)
 {
     PVOID BaseAddress = NULL;
     PHYSICAL_ADDRESS Lowest = { 0 };
@@ -55,14 +58,16 @@ CmAllocateContiguousMemory(
 
 VOID NTAPI
 CmFreeContiguousMemory(
-    __in PVOID BaseAddress)
+    __in PVOID BaseAddress
+)
 {
     MmFreeContiguousMemory(BaseAddress);
 }
 
 ULONG_PTR NTAPI
 CmGetDirectoryTableBase(
-    __in PEPROCESS Process)
+    __in PEPROCESS Process
+)
 {
     ULONG_PTR DirectoryTableBase = 0;
 

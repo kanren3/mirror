@@ -14,7 +14,8 @@ PVOID TuPageDirectoryPointer;
 
 NTSTATUS NTAPI
 TuBuildPageDirectory(
-    __out PVOID DirectoryPointer)
+    __out PVOID DirectoryPointer
+)
 {
     PVOID RootDirectoryPointer;
     PHYSICAL_ADDRESS RootDirectoryBase;
@@ -37,7 +38,8 @@ TuDpcDispatcher(
     __in PKDPC Dpc,
     __in PTHUNK_TASK Task,
     __in PKEVENT Event,
-    __in PVOID SystemArgument2)
+    __in PVOID SystemArgument2
+)
 {
     if (PROCESSOR_AMD == TuProcessorType) {
         Task->Status = SvmTaskDispatcher(TuGenericDomain,
@@ -56,7 +58,8 @@ TuDpcDispatcher(
 NTSTATUS NTAPI
 TuGenericCall(
     __in ULONG TaskCode,
-    __inout_opt PVOID Context)
+    __inout_opt PVOID Context
+)
 {
     THUNK_TASK ThunkTask;
     ULONG Index;

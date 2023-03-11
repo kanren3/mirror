@@ -6,7 +6,8 @@
 
 VOID NTAPI
 VmxUnprepareDomainSpace(
-    __in PVMX_DOMAIN Domain)
+    __in PVMX_DOMAIN Domain
+)
 {
     if (NULL != Domain->Vmon) {
         CmFreeContiguousMemory(Domain->Vmon);
@@ -47,7 +48,8 @@ VmxUnprepareDomainSpace(
 
 NTSTATUS NTAPI
 VmxPrepareDomainSpace(
-    __in PVMX_DOMAIN Domain)
+    __in PVMX_DOMAIN Domain
+)
 {
     Domain->Vmon = CmAllocateContiguousMemory(PAGE_SIZE);
 
@@ -149,7 +151,8 @@ Cleanup:
 VOID NTAPI
 VmxFreeDomain(
     __in ULONG Number,
-    __in PVMX_DOMAIN Domain)
+    __in PVMX_DOMAIN Domain
+)
 {
     ULONG Index;
 
@@ -162,7 +165,8 @@ VmxFreeDomain(
 
 PVMX_DOMAIN NTAPI
 VmxAllocateDomain(
-    __in ULONG Number)
+    __in ULONG Number
+)
 {
     NTSTATUS Status;
     PVMX_DOMAIN Domain;
@@ -200,7 +204,8 @@ NTSTATUS NTAPI
 VmxTaskDispatcher(
     __in PVMX_DOMAIN Domain,
     __in ULONG TaskCode,
-    __inout_opt PVOID Context)
+    __inout_opt PVOID Context
+)
 {
     NTSTATUS Status;
 

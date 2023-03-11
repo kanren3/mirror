@@ -5,8 +5,8 @@
 extern "C" {
 #endif
 
-__MACHINEX64(void __stdcall __ins_cpuidex(int func, int subfunc, int* info))
-__MACHINEX86(void __stdcall __ins_cpuidex(int func, int subfunc, int* info))
+__MACHINEX64(void __stdcall __ins_cpuidex(int func, __int32 subfunc, __int32* info))
+__MACHINEX86(void __stdcall __ins_cpuidex(int func, __int32 subfunc, __int32* info))
 
 __MACHINEX64(unsigned __int64 __stdcall __ins_rdmsr(int reg))
 __MACHINEX86(unsigned __int64 __stdcall __ins_rdmsr(int reg))
@@ -15,28 +15,28 @@ __MACHINEX64(void __stdcall __ins_wrmsr(int reg, unsigned __int64 value))
 __MACHINEX86(void __stdcall __ins_wrmsr(int reg, unsigned __int64 value))
 
 __MACHINEX64(unsigned __int64 __stdcall __ins_readcr(int id))
-__MACHINEX86(unsigned int __stdcall __ins_readcr(int id))
+__MACHINEX86(unsigned __int32 __stdcall __ins_readcr(int id))
 
 __MACHINEX64(void __stdcall __ins_writecr(int id, unsigned __int64 value))
-__MACHINEX86(void __stdcall __ins_writecr(int id, unsigned int value))
+__MACHINEX86(void __stdcall __ins_writecr(int id, unsigned __int32 value))
 
 __MACHINEX64(unsigned __int64 __stdcall __ins_readdr(int id))
-__MACHINEX86(unsigned int __stdcall __ins_readdr(int id))
+__MACHINEX86(unsigned __int32 __stdcall __ins_readdr(int id))
 
 __MACHINEX64(void __stdcall __ins_writedr(int id, unsigned __int64 value))
-__MACHINEX86(void __stdcall __ins_writedr(int id, unsigned int value))
+__MACHINEX86(void __stdcall __ins_writedr(int id, unsigned __int32 value))
 
 __MACHINEX64(unsigned __int64 __stdcall __ins_rdtsc(void))
 __MACHINEX86(unsigned __int64 __stdcall __ins_rdtsc(void))
 
-__MACHINEX64(unsigned __int64 __stdcall __ins_rdtscp(unsigned int aux))
-__MACHINEX86(unsigned __int64 __stdcall __ins_rdtscp(unsigned int aux))
+__MACHINEX64(unsigned __int64 __stdcall __ins_rdtscp(unsigned __int32 aux))
+__MACHINEX86(unsigned __int64 __stdcall __ins_rdtscp(unsigned __int32 aux))
 
-__MACHINEX64(unsigned __int64 __stdcall __ins_xgetbv(unsigned int xcr))
-__MACHINEX86(unsigned __int64 __stdcall __ins_xgetbv(unsigned int xcr))
+__MACHINEX64(unsigned __int64 __stdcall __ins_xgetbv(unsigned __int32 xcr))
+__MACHINEX86(unsigned __int64 __stdcall __ins_xgetbv(unsigned __int32 xcr))
 
-__MACHINEX64(void __stdcall __ins_xsetbv(unsigned int xcr, unsigned __int64 value))
-__MACHINEX86(void __stdcall __ins_xsetbv(unsigned int xcr, unsigned __int64 value))
+__MACHINEX64(void __stdcall __ins_xsetbv(unsigned __int32 xcr, unsigned __int64 value))
+__MACHINEX86(void __stdcall __ins_xsetbv(unsigned __int32 xcr, unsigned __int64 value))
 
 __MACHINEX64(void __stdcall __ins_invd(void))
 __MACHINEX86(void __stdcall __ins_invd(void))
@@ -71,8 +71,8 @@ __MACHINEX86(int __stdcall __ins_vmptrld(unsigned __int64* vmcs))
 __MACHINEX64(int __stdcall __ins_vmread(int field, void* value))
 __MACHINEX86(int __stdcall __ins_vmread(int field, void* value))
 
-__MACHINEX64(int __stdcall __ins_vmwrite(int field, void* value))
-__MACHINEX86(int __stdcall __ins_vmwrite(int field, void* value))
+__MACHINEX64(int __stdcall __ins_vmwrite(int field, unsigned __int64 value))
+__MACHINEX86(int __stdcall __ins_vmwrite(int field, unsigned __int32 value))
 
 __MACHINEX64(int __stdcall __ins_vmlaunch(void))
 __MACHINEX86(int __stdcall __ins_vmlaunch(void))

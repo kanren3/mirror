@@ -30,7 +30,8 @@ FeaGetProcessorNumber()
 
 VOID NTAPI
 FeaGetXFeatureInfo(
-    __out PXFEATURE_INFO XFeatureInfo)
+    __out PXFEATURE_INFO XFeatureInfo
+)
 {
     CPU_INFO CpuInfo;
 

@@ -16,7 +16,8 @@ PETHREAD LogMsgWorkerThread = NULL;
 VOID NTAPI
 LogSyncPrint(
     __in PCSTR Format,
-    __in...)
+    __in...
+)
 {
     va_list ArgList;
 
@@ -33,7 +34,8 @@ LogSyncPrint(
 
 VOID NTAPI
 LogMsgSingleHandler(
-    __in PMESSAGE_HEADER Message)
+    __in PMESSAGE_HEADER Message
+)
 {
     switch (Message->Type) {
     case MSG_TYPE_UNICODE:
@@ -62,7 +64,8 @@ LogMsgMultipleHandler()
 VOID NTAPI
 LogAcquireSpinLock(
     __inout volatile PULONG SpinLock,
-    __out PKIRQL Irql)
+    __out PKIRQL Irql
+)
 {
     KeRaiseIrql(HIGH_LEVEL, Irql);
 
@@ -74,7 +77,8 @@ LogAcquireSpinLock(
 VOID NTAPI
 LogReleaseSpinLock(
     __inout volatile PULONG SpinLock,
-    __in KIRQL Irql)
+    __in KIRQL Irql
+)
 {
     InterlockedAnd(SpinLock, 0);
     KeLowerIrql(Irql);
@@ -84,7 +88,8 @@ VOID NTAPI
 LogSendMessage(
     __in PVOID Data,
     __in ULONG Type,
-    __in ULONG Length)
+    __in ULONG Length
+)
 {
     KIRQL Irql;
     PMESSAGE_HEADER Message;
@@ -113,7 +118,8 @@ LogSendMessage(
 VOID NTAPI
 LogAsyncPrint(
     __in PCSTR Format,
-    __in...)
+    __in...
+)
 {
     va_list ArgList;
     char Buffer[512];
@@ -136,7 +142,8 @@ LogAsyncPrint(
 
 VOID NTAPI
 LogMsgWorker(
-    __in PVOID StartContext)
+    __in PVOID StartContext
+)
 {
     KIRQL Irql;
     LARGE_INTEGER Interval;
@@ -191,7 +198,8 @@ LogUninitialize()
 
 NTSTATUS NTAPI
 LogInitialize(
-    __in ULONG FlushTime)
+    __in ULONG FlushTime
+)
 {
     NTSTATUS Status;
     OBJECT_ATTRIBUTES ObjectAttributes;
