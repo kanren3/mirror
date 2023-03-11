@@ -25,12 +25,12 @@ typedef struct _SVM_DOMAIN {
 } SVM_DOMAIN, *PSVM_DOMAIN;
 
 VOID NTAPI
-SvmUnprepareDomainSpace(
-    __in PSVM_DOMAIN Domain,
-    __in ULONG Number);
+SvmFreeDomain(
+    __in ULONG Number,
+    __in PSVM_DOMAIN Domain);
 
 PSVM_DOMAIN NTAPI
-SvmPrepareDomainSpace(
+SvmAllocateDomain(
     __in ULONG Number);
 
 NTSTATUS NTAPI

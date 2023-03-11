@@ -42,8 +42,6 @@ FeaGetXFeatureInfo(
     XFeatureInfo->SupportedUpperMask = CpuInfo.Edx;
 }
 
-
-
 ULONG NTAPI
 FeaGetVmxFeature()
 {

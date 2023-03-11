@@ -59,7 +59,7 @@ TuGenericCall(
     __inout_opt PVOID Context)
 {
     THUNK_TASK ThunkTask;
-    ULONG i;
+    ULONG Index;
     KEVENT Event;
     KDPC Dpc;
     PROCESSOR_NUMBER Number;
@@ -74,13 +74,14 @@ TuGenericCall(
 
     KeInitializeEvent(&Event, NotificationEvent, FALSE);
 
-    for (i = 0; i < TuProcessorNumber; i++) {
-        KeGetProcessorNumberFromIndex(i, &Number);
-        KeClearEvent(&Event);
-
+    for (Index = 0; Index < TuProcessorNumber; Index++) {
         KeInitializeDpc(&Dpc, TuDpcDispatcher, &ThunkTask);
+
+        KeGetProcessorNumberFromIndex(Index, &Number);
         KeSetTargetProcessorDpcEx(&Dpc, &Number);
         KeSetImportanceDpc(&Dpc, HighImportance);
+
+        KeClearEvent(&Event);
 
         if (FALSE != KeInsertQueueDpc(&Dpc, &Event, NULL)) {
             KeWaitForSingleObject(&Event, Executive, KernelMode, FALSE, NULL);
@@ -94,63 +95,79 @@ NTSTATUS NTAPI
 TuInitialize()
 {
     NTSTATUS Status;
+    PVOID PageDirectoryPointer = NULL;
+    PVOID GenericDomain = NULL;
 
     TuProcessorType = FeaGetProcessorType();
 
+    if (PROCESSOR_OTHERS == TuProcessorType) {
+        Status = STATUS_NOT_SUPPORTED;
+        goto Cleanup;
+    }
+
+    PageDirectoryPointer = CmAllocateContiguousMemory(PAGE_SIZE);
+
+    if (NULL == PageDirectoryPointer) {
+        Status = STATUS_INSUFFICIENT_RESOURCES;
+        goto Cleanup;
+    }
+
+    Status = TuBuildPageDirectory(PageDirectoryPointer);
+
+    if (FALSE == NT_SUCCESS(Status)) {
+        goto Cleanup;
+    }
+
     TuProcessorNumber = FeaGetProcessorNumber();
 
-    if (PROCESSOR_OTHERS == TuProcessorType) {
-        return STATUS_NOT_SUPPORTED;
-    }
-
-    TuPageDirectoryPointer = CmAllocateContiguousMemory(PAGE_SIZE);
-
-    if (NULL != TuPageDirectoryPointer) {
-        Status = TuBuildPageDirectory(TuPageDirectoryPointer);
-
-        if (FALSE != NT_SUCCESS(Status)) {
-
-            if (PROCESSOR_AMD == TuProcessorType) {
-                TuGenericDomain = SvmPrepareDomainSpace(TuProcessorNumber);
-            }
-            else {
-                TuGenericDomain = VmxPrepareDomainSpace(TuProcessorNumber);
-            }
-
-            if (NULL != TuGenericDomain) {
-                return STATUS_SUCCESS;
-            }
-            else {
-                Status = STATUS_INSUFFICIENT_RESOURCES;
-            }
-        }
-
-        CmFreeContiguousMemory(TuPageDirectoryPointer);
-        TuPageDirectoryPointer = NULL;
+    if (PROCESSOR_AMD == TuProcessorType) {
+        GenericDomain = SvmAllocateDomain(TuProcessorNumber);
     }
     else {
+        GenericDomain = VmxAllocateDomain(TuProcessorNumber);
+    }
+
+    if (NULL == GenericDomain) {
         Status = STATUS_INSUFFICIENT_RESOURCES;
+        goto Cleanup;
+    }
+
+    TuPageDirectoryPointer = PageDirectoryPointer;
+    TuGenericDomain = GenericDomain;
+
+    return STATUS_SUCCESS;
+
+Cleanup:
+
+    if (NULL != PageDirectoryPointer) {
+        CmFreeContiguousMemory(PageDirectoryPointer);
+    }
+
+    if (NULL != GenericDomain) {
+        CmFreeContiguousMemory(GenericDomain);
+    }
+
+    return Status;
+}
+
+NTSTATUS NTAPI
+TuUninitialize()
+{
+    if (NULL == TuGenericDomain) {
+        return STATUS_MEMORY_NOT_ALLOCATED;
+    }
+
+    CmFreeContiguousMemory(TuPageDirectoryPointer);
+    TuPageDirectoryPointer = NULL;
+
+    if (PROCESSOR_AMD == TuProcessorType) {
+        SvmFreeDomain(TuProcessorNumber, TuGenericDomain);
+        TuGenericDomain = NULL;
+    }
+    else {
+        VmxFreeDomain(TuProcessorNumber, TuGenericDomain);
+        TuGenericDomain = NULL;
     }
 
     return STATUS_SUCCESS;
-}
-
-VOID NTAPI
-TuUninitialize()
-{
-    if (NULL != TuGenericDomain) {
-        if (PROCESSOR_AMD == TuProcessorType) {
-            SvmUnprepareDomainSpace(TuGenericDomain, TuProcessorNumber);
-        }
-        else {
-            VmxUnprepareDomainSpace(TuGenericDomain, TuProcessorNumber);
-        }
-
-        TuGenericDomain = NULL;
-
-        if (NULL != TuPageDirectoryPointer) {
-            CmFreeContiguousMemory(TuPageDirectoryPointer);
-            TuPageDirectoryPointer = NULL;
-        }
-    }
 }

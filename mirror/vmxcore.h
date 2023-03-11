@@ -33,12 +33,12 @@ typedef struct _VMX_DOMAIN {
 } VMX_DOMAIN, *PVMX_DOMAIN;
 
 VOID NTAPI
-VmxUnprepareDomainSpace(
-    __in PVMX_DOMAIN Domain,
-    __in ULONG Number);
+VmxFreeDomain(
+    __in ULONG Number,
+    __in PVMX_DOMAIN Domain);
 
 PVMX_DOMAIN NTAPI
-VmxPrepareDomainSpace(
+VmxAllocateDomain(
     __in ULONG Number);
 
 NTSTATUS NTAPI

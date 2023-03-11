@@ -22,7 +22,7 @@ TuGenericCall(
 NTSTATUS NTAPI
 TuInitialize();
 
-VOID NTAPI
+NTSTATUS NTAPI
 TuUninitialize();
 
 #ifdef __cplusplus
