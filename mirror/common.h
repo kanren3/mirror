@@ -25,6 +25,11 @@ ULONG_PTR NTAPI
 CmGetDirectoryTableBase(
     __in PEPROCESS Process);
 
+NTSTATUS NTAPI
+CmBuildPageDirectory(
+    __out PVOID DirectoryPointer
+);
+
 #ifdef __cplusplus
 }
 #endif

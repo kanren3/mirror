@@ -32,6 +32,10 @@ typedef struct _VMX_DOMAIN {
     ULONGLONG Features;
 } VMX_DOMAIN, *PVMX_DOMAIN;
 
+NTSTATUS NTAPI
+VmxPrepareStartup(
+    __in PVMX_DOMAIN Domain);
+
 VOID NTAPI
 VmxFreeDomain(
     __in ULONG Number,

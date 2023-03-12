@@ -12,27 +12,6 @@ ULONG TuProcessorType;
 PVOID TuGenericDomain;
 PVOID TuPageDirectoryPointer;
 
-NTSTATUS NTAPI
-TuBuildPageDirectory(
-    __out PVOID DirectoryPointer
-)
-{
-    PVOID RootDirectoryPointer;
-    PHYSICAL_ADDRESS RootDirectoryBase;
-
-    RootDirectoryBase.QuadPart = CmGetDirectoryTableBase(PsInitialSystemProcess) & ~0xFFF;
-
-    RootDirectoryPointer = MmGetVirtualForPhysical(RootDirectoryBase);
-
-    if (NULL == RootDirectoryPointer) {
-        return STATUS_UNSUCCESSFUL;
-    }
-
-    RtlCopyMemory(DirectoryPointer, RootDirectoryPointer, PAGE_SIZE);
-
-    return STATUS_SUCCESS;
-}
-
 VOID NTAPI
 TuDpcDispatcher(
     __in PKDPC Dpc,
@@ -61,15 +40,15 @@ TuGenericCall(
     __inout_opt PVOID Context
 )
 {
-    THUNK_TASK ThunkTask;
+    THUNK_TASK Task;
     ULONG Index;
     KEVENT Event;
     KDPC Dpc;
     PROCESSOR_NUMBER Number;
 
-    ThunkTask.TaskCode = TaskCode;
-    ThunkTask.Context = Context;
-    ThunkTask.Status = STATUS_SUCCESS;
+    Task.TaskCode = TaskCode;
+    Task.Context = Context;
+    Task.Status = STATUS_SUCCESS;
 
     if (NULL == TuGenericDomain) {
         return STATUS_MEMORY_NOT_ALLOCATED;
@@ -78,7 +57,7 @@ TuGenericCall(
     KeInitializeEvent(&Event, NotificationEvent, FALSE);
 
     for (Index = 0; Index < TuProcessorNumber; Index++) {
-        KeInitializeDpc(&Dpc, TuDpcDispatcher, &ThunkTask);
+        KeInitializeDpc(&Dpc, TuDpcDispatcher, &Task);
 
         KeGetProcessorNumberFromIndex(Index, &Number);
         KeSetTargetProcessorDpcEx(&Dpc, &Number);
@@ -91,7 +70,7 @@ TuGenericCall(
         }
     }
 
-    return ThunkTask.Status;
+    return Task.Status;
 }
 
 NTSTATUS NTAPI
@@ -115,7 +94,7 @@ TuInitialize()
         goto Cleanup;
     }
 
-    Status = TuBuildPageDirectory(PageDirectoryPointer);
+    Status = CmBuildPageDirectory(PageDirectoryPointer);
 
     if (FALSE == NT_SUCCESS(Status)) {
         goto Cleanup;

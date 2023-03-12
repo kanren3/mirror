@@ -79,3 +79,24 @@ CmGetDirectoryTableBase(
 
     return DirectoryTableBase;
 }
+
+NTSTATUS NTAPI
+CmBuildPageDirectory(
+    __out PVOID DirectoryPointer
+)
+{
+    PVOID RootDirectoryPointer;
+    PHYSICAL_ADDRESS RootDirectoryBase;
+
+    RootDirectoryBase.QuadPart = CmGetDirectoryTableBase(PsInitialSystemProcess) & ~0xFFF;
+
+    RootDirectoryPointer = MmGetVirtualForPhysical(RootDirectoryBase);
+
+    if (NULL == RootDirectoryPointer) {
+        return STATUS_UNSUCCESSFUL;
+    }
+
+    RtlCopyMemory(DirectoryPointer, RootDirectoryPointer, PAGE_SIZE);
+
+    return STATUS_SUCCESS;
+}

@@ -24,6 +24,10 @@ typedef struct _SVM_DOMAIN {
     ULONGLONG Features;
 } SVM_DOMAIN, *PSVM_DOMAIN;
 
+NTSTATUS NTAPI
+SvmPrepareStartup(
+    __in PSVM_DOMAIN Domain);
+
 VOID NTAPI
 SvmFreeDomain(
     __in ULONG Number,

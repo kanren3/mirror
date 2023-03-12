@@ -201,6 +201,15 @@ SvmAllocateDomain(
 }
 
 NTSTATUS NTAPI
+SvmFirstEntry(
+    __in PSVM_DOMAIN Domain,
+    __in PGUEST_CONTEXT Context
+)
+{
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS NTAPI
 SvmTaskDispatcher(
     __in PSVM_DOMAIN Domain,
     __in ULONG TaskCode,
@@ -208,14 +217,17 @@ SvmTaskDispatcher(
 )
 {
     NTSTATUS Status;
+    PSVM_DOMAIN CurrentDomain;
+    
+    CurrentDomain = &Domain[KeGetCurrentProcessorNumber()];
 
     switch (TaskCode) {
     case TASK_STARTUP:
-        LogSyncPrint("svm startup < %p >\n", &Domain[KeGetCurrentProcessorNumber()]);
-        Status = STATUS_SUCCESS;
+        Status = SvmPrepareStartup(CurrentDomain);
+        LogSyncPrint("svm startup < %p > | < %08x >\n", CurrentDomain, Status);
         break;
     case TASK_SHUTDOWN:
-        LogSyncPrint("svm shutdown < %p >\n", &Domain[KeGetCurrentProcessorNumber()]);
+        LogSyncPrint("svm shutdown < %p >\n", CurrentDomain);
         Status = STATUS_SUCCESS;
         break;
     default:

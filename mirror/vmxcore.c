@@ -201,6 +201,15 @@ VmxAllocateDomain(
 }
 
 NTSTATUS NTAPI
+VmxFirstEntry(
+    __in PVMX_DOMAIN Domain,
+    __in PGUEST_CONTEXT Context
+)
+{
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS NTAPI
 VmxTaskDispatcher(
     __in PVMX_DOMAIN Domain,
     __in ULONG TaskCode,
@@ -208,14 +217,17 @@ VmxTaskDispatcher(
 )
 {
     NTSTATUS Status;
+    PVMX_DOMAIN CurrentDomain;
+
+    CurrentDomain = &Domain[KeGetCurrentProcessorNumber()];
 
     switch (TaskCode) {
     case TASK_STARTUP:
-        LogSyncPrint("vmx startup < %p >\n", &Domain[KeGetCurrentProcessorNumber()]);
-        Status = STATUS_SUCCESS;
+        Status = VmxPrepareStartup(CurrentDomain);
+        LogSyncPrint("vmx startup < %p > | < %08x >\n", CurrentDomain, Status);
         break;
     case TASK_SHUTDOWN:
-        LogSyncPrint("vmx shutdown < %p >\n", &Domain[KeGetCurrentProcessorNumber()]);
+        LogSyncPrint("vmx shutdown < %p >\n", CurrentDomain);
         Status = STATUS_SUCCESS;
         break;
     default:
