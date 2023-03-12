@@ -39,6 +39,84 @@ GsDr6 equ 74h
 GsDr7 equ 78h
 GsMax equ 7Ch
 
+extern _SvmFirstEntry@8:proc
+
+cPublicProc _SvmPrepareStartup, 1
+
+        push ebp
+        mov ebp, esp
+        sub esp, GsMax
+
+        mov ecx, [ebp + 8]
+        mov edx, esp
+
+        mov [edx + GsEax], eax
+        mov [edx + GsEcx], ecx
+        mov [edx + GsEdx], edx
+        mov [edx + GsEbx], ebx
+        mov [edx + GsEsp], esp
+        mov [edx + GsEbp], ebp
+        mov [edx + GsEsi], esi
+        mov [edx + GsEdi], edi
+        
+        lea eax, Succeed
+        mov [edx + GsEip], eax
+        
+        pushfd
+        pop [edx + GsEFlags]
+        
+        mov [edx + GsSegEs], es
+        mov [edx + GsSegCs], cs
+        mov [edx + GsSegSs], ss
+        mov [edx + GsSegDs], ds
+        mov [edx + GsSegFs], fs
+        mov [edx + GsSegGs], gs
+        
+        sldt word ptr [edx + GsLdtr]
+        str word ptr [edx + GsTr]
+        
+        sgdt fword ptr [edx + GsGdtr]
+        sidt fword ptr [edx + GsIdtr]
+        
+        mov eax, cr0
+        mov [edx + GsCr0], eax
+        mov eax, cr2
+        mov [edx + GsCr2], eax
+        mov eax, cr3
+        mov [edx + GsCr3], eax
+        mov eax, cr4
+        mov [edx + GsCr4], eax
+        
+        mov eax, dr0
+        mov [edx + GsDr0], eax
+        mov eax, dr1
+        mov [edx + GsDr1], eax
+        mov eax, dr2
+        mov [edx + GsDr2], eax
+        mov eax, dr3
+        mov [edx + GsDr3], eax
+        mov eax, dr6
+        mov [edx + GsDr6], eax
+        mov eax, dr7
+        mov [edx + GsDr7], eax
+
+        push edx
+        push ecx
+        call _SvmFirstEntry@8
+
+Failed:
+        jmp Complete
+Succeed:
+        xor eax, eax
+Complete:
+        add esp, GsMax
+        mov esp, ebp
+        pop ebp
+
+        stdRET _SvmPrepareStartup
+
+stdENDP _SvmPrepareStartup
+
 _TEXT ends
 
 end
