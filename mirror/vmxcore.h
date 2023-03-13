@@ -20,8 +20,8 @@ typedef struct _VMX_DOMAIN {
     PUCHAR VmmStack;
     PUCHAR MsrBitmap;
     PUCHAR IoBitmap;
-    PUCHAR Tss;
     PUCHAR XSaveArea;
+    PKTSS Tss;
 
     KDESCRIPTOR Gdtr;
     KDESCRIPTOR Idtr;

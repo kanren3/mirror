@@ -78,17 +78,24 @@ typedef union _KGDT_LIMIT {
     };
 } KGDT_LIMIT, *PKGDT_LIMIT;
 
-typedef union _KGDT_BASE {
-    ULONG_PTR Base;
+typedef union _KGDT_BASE32 {
+    ULONG Base;
     struct {
         USHORT BaseLow;
         UCHAR BaseMiddle;
         UCHAR BaseHigh;
-#ifdef _WIN64
-        ULONG BaseUpper;
-#endif
     };
-} KGDT_BASE, *PKGDT_BASE;
+} KGDT_BASE32, *PKGDT_BASE32;
+
+typedef union _KGDT_BASE64 {
+    ULONGLONG Base;
+    struct {
+        USHORT BaseLow;
+        UCHAR BaseMiddle;
+        UCHAR BaseHigh;
+        ULONG BaseUpper;
+    };
+} KGDT_BASE64, *PKGDT_BASE64;
 
 typedef struct _KGDTENTRY32 {
     USHORT LimitLow;
@@ -131,16 +138,16 @@ typedef union _KGDTENTRY64 {
             } Bytes;
 
             struct {
-                UCHAR BaseMiddle : 8;
-                UCHAR Type : 5;
-                UCHAR Dpl : 2;
-                UCHAR Present : 1;
-                UCHAR LimitHigh : 4;
-                UCHAR System : 1;
-                UCHAR LongMode : 1;
-                UCHAR DefaultBig : 1;
-                UCHAR Granularity : 1;
-                UCHAR BaseHigh : 8;
+                ULONG BaseMiddle : 8;
+                ULONG Type : 5;
+                ULONG Dpl : 2;
+                ULONG Present : 1;
+                ULONG LimitHigh : 4;
+                ULONG System : 1;
+                ULONG LongMode : 1;
+                ULONG DefaultBig : 1;
+                ULONG Granularity : 1;
+                ULONG BaseHigh : 8;
             } Bits;
         };
 

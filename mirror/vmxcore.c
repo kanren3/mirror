@@ -7,6 +7,26 @@
 
 extern PVOID TuPageDirectoryPointer;
 
+ULONG NTAPI
+VmxGetFeatures()
+{
+    ULONG Feature = 0;
+    CPU_INFO CpuInfo;
+    ULONGLONG Value;
+
+    __ins_cpuidex(0x00000001, 0, &CpuInfo.Eax);
+    if (0 != (0x00000020 & CpuInfo.Ecx)) {
+        Feature |= VMX_FEATURE_SUPPORT;
+    }
+
+    Value = __ins_rdmsr(MSR_FEATURE_CONTROL);
+    if (0 != (0x00000004 & Value)) {
+        Feature |= VMX_FEATURE_ENABLE;
+    }
+
+    return Feature;
+}
+
 VOID NTAPI
 VmxUnprepareDomainSpace(
     __in PVMX_DOMAIN Domain
@@ -111,43 +131,7 @@ VmxPrepareDomainSpace(
     return STATUS_SUCCESS;
 
 Cleanup:
-
-    if (NULL != Domain->Vmon) {
-        CmFreeContiguousMemory(Domain->Vmon);
-    }
-
-    if (NULL != Domain->Vmcs) {
-        CmFreeContiguousMemory(Domain->Vmcs);
-    }
-
-    if (NULL != Domain->MsrBitmap) {
-        CmFreeContiguousMemory(Domain->MsrBitmap);
-    }
-
-    if (NULL != Domain->IoBitmap) {
-        CmFreeContiguousMemory(Domain->IoBitmap);
-    }
-
-    if (NULL != Domain->VmmStack) {
-        CmFreeNonPagedMemory(Domain->VmmStack);
-    }
-
-    if (NULL != Domain->Tss) {
-        CmFreeNonPagedMemory(Domain->Tss);
-    }
-
-    if (NULL != Domain->XSaveArea) {
-        CmFreeNonPagedMemory(Domain->XSaveArea);
-    }
-
-    if (NULL != Domain->Gdtr.Base) {
-        CmFreeNonPagedMemory(Domain->Gdtr.Base);
-    }
-
-    if (NULL != Domain->Idtr.Base) {
-        CmFreeNonPagedMemory(Domain->Idtr.Base);
-    }
-
+    VmxUnprepareDomainSpace(Domain);
     return STATUS_INSUFFICIENT_RESOURCES;
 }
 
@@ -209,41 +193,40 @@ VmxPrepareGdtEntry(
 )
 {
 #ifndef _WIN64
-    
+    CmBuildI386GdtEntry(Domain->Gdtr.Base, VGDT_NULL, 0, 0, 0, 0, FALSE);
+    CmBuildI386GdtEntry(Domain->Gdtr.Base, VGDT_CODE, 0, 0xFFFFFFFF, TYPE_CODE, DPL_SYSTEM, TRUE);
+    CmBuildI386GdtEntry(Domain->Gdtr.Base, VGDT_DATA, 0, 0xFFFFFFFF, TYPE_DATA, DPL_SYSTEM, TRUE);
+    CmBuildI386GdtEntry(Domain->Gdtr.Base, VGDT_TSS, PtrToUlongPtr(Domain->Tss), sizeof(KTSS) - 1, TYPE_TSS, DPL_SYSTEM, TRUE);
 #else
     CmBuildAmd64GdtEntry(Domain->Gdtr.Base, VGDT_NULL, 0, 0, 0, 0, FALSE, FALSE);
     CmBuildAmd64GdtEntry(Domain->Gdtr.Base, VGDT_CODE, 0, 0, TYPE_CODE, DPL_SYSTEM, TRUE, TRUE);
     CmBuildAmd64GdtEntry(Domain->Gdtr.Base, VGDT_DATA, 0, 0, TYPE_DATA, DPL_SYSTEM, FALSE, TRUE);
-    CmBuildAmd64GdtEntry(Domain->Gdtr.Base, VGDT_TSS, 0, 0, TYPE_TSS64, DPL_SYSTEM, FALSE, TRUE);
-
-    
+    CmBuildAmd64GdtEntry(Domain->Gdtr.Base, VGDT_TSS, PtrToUlongPtr(Domain->Tss), sizeof(KTSS) - 1, TYPE_TSS, DPL_SYSTEM, FALSE, TRUE);
 #endif
 }
 
 VOID NTAPI
-VmxPrepareIdtEntry()
+VmxPrepareHostState(
+    __in PVMX_DOMAIN Domain
+)
+{
+    VmxPrepareGdtEntry(Domain);
+}
+
+VOID NTAPI
+VmxPrepareGuestState(
+    __in PVMX_DOMAIN Domain
+)
 {
 
 }
 
-ULONG NTAPI
-VmxGetFeatures()
+VOID NTAPI
+VmxPrepareControlArea(
+    __in PVMX_DOMAIN Domain
+)
 {
-    ULONG Feature = 0;
-    CPU_INFO CpuInfo;
-    ULONGLONG Value;
 
-    __ins_cpuidex(0x00000001, 0, &CpuInfo.Eax);
-    if (0 != (0x00000020 & CpuInfo.Ecx)) {
-        Feature |= VMX_FEATURE_SUPPORT;
-    }
-
-    Value = __ins_rdmsr(MSR_FEATURE_CONTROL);
-    if (0 != (0x00000004 & Value)) {
-        Feature |= VMX_FEATURE_ENABLE;
-    }
-
-    return TRUE;
 }
 
 NTSTATUS NTAPI
@@ -308,6 +291,13 @@ VmxFirstEntry(
     __ins_vmxon(&VmonPa.QuadPart);
     __ins_vmclear(&VmcsPa.QuadPart);
     __ins_vmptrld(&VmcsPa.QuadPart);
+
+    VmxPrepareHostState(Domain);
+    VmxPrepareGuestState(Domain);
+    VmxPrepareControlArea(Domain);
+
+    __ins_lgdt(&Domain->Gdtr.Limit);
+    __ins_lgdt(&Context->Gdtr.Limit);
 
     __ins_vmlaunch();
     __ins_vmxoff();

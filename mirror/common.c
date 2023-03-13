@@ -113,7 +113,7 @@ CmBuildI386GdtEntry(
 )
 {
     PKGDTENTRY32 GdtEntry;
-    KGDT_BASE GdtBase;
+    KGDT_BASE32 GdtBase;
     KGDT_LIMIT GdtLimit;
 
     GdtEntry = (PKGDTENTRY32)((PUCHAR)Gdt + (Selector & ~7));
@@ -124,7 +124,7 @@ CmBuildI386GdtEntry(
     GdtEntry->Bits.BaseHigh = GdtBase.BaseHigh;
 
     if (Limit > (1 << 20)) {
-        GdtLimit.Limit = Limit / 0x1000;
+        GdtLimit.Limit = Limit >> 12;
         GdtEntry->Bits.Granularity = 1;
     }
     else {
@@ -155,7 +155,7 @@ CmBuildAmd64GdtEntry(
 )
 {
     PKGDTENTRY64 GdtEntry;
-    KGDT_BASE GdtBase;
+    KGDT_BASE64 GdtBase;
     KGDT_LIMIT GdtLimit;
 
     GdtEntry = (PKGDTENTRY64)((PUCHAR)Gdt + (Selector & ~7));
@@ -175,7 +175,7 @@ CmBuildAmd64GdtEntry(
     }
 
     if (Limit > (1 << 20)) {
-        GdtLimit.Limit = Limit / 0x1000;
+        GdtLimit.Limit = Limit >> 12;
         GdtEntry->Bits.Granularity = 1;
     }
     else {

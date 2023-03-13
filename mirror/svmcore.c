@@ -5,6 +5,39 @@
 #include "svmcore.h"
 #include "thunk.h"
 
+ULONG NTAPI
+SvmGetFeatures()
+{
+    ULONG Feature = 0;
+    CPU_INFO CpuInfo;
+    ULONGLONG Value;
+
+    __ins_cpuidex(0x80000001, 0, &CpuInfo.Eax);
+    if (0 != (0x00000004 & CpuInfo.Ecx)) {
+        Feature |= SVM_FEATURE_SUPPORT;
+    }
+
+    Value = __ins_rdmsr(MSR_VM_CR);
+    if (0 == (0x00000010 & Value)) {
+        Feature |= SVM_FEATURE_ENABLE;
+    }
+
+    __ins_cpuidex(0x8000000A, 0, &CpuInfo.Eax);
+    if (0 != (0x00000001 & CpuInfo.Edx)) {
+        Feature |= SVM_FEATURE_NPT;
+    }
+
+    if (0 != (0x00000020 & CpuInfo.Edx)) {
+        Feature |= SVM_FEATURE_VMCB_CLEAN;
+    }
+
+    if (0 != (0x00000040 & CpuInfo.Edx)) {
+        Feature |= SVM_FEATURE_FLUSH_BY_ASID;
+    }
+
+    return Feature;
+}
+
 VOID NTAPI
 SvmUnprepareDomainSpace(
     __in PSVM_DOMAIN Domain
@@ -109,43 +142,7 @@ SvmPrepareDomainSpace(
     return STATUS_SUCCESS;
 
 Cleanup:
-
-    if (NULL != Domain->Vmcb) {
-        CmFreeContiguousMemory(Domain->Vmcb);
-    }
-
-    if (NULL != Domain->Vmhs) {
-        CmFreeContiguousMemory(Domain->Vmhs);
-    }
-
-    if (NULL != Domain->MsrBitmap) {
-        CmFreeContiguousMemory(Domain->MsrBitmap);
-    }
-
-    if (NULL != Domain->IoBitmap) {
-        CmFreeContiguousMemory(Domain->IoBitmap);
-    }
-
-    if (NULL != Domain->VmmStack) {
-        CmFreeNonPagedMemory(Domain->VmmStack);
-    }
-
-    if (NULL != Domain->Tss) {
-        CmFreeNonPagedMemory(Domain->Tss);
-    }
-
-    if (NULL != Domain->XSaveArea) {
-        CmFreeNonPagedMemory(Domain->XSaveArea);
-    }
-
-    if (NULL != Domain->Gdtr.Base) {
-        CmFreeNonPagedMemory(Domain->Gdtr.Base);
-    }
-
-    if (NULL != Domain->Idtr.Base) {
-        CmFreeNonPagedMemory(Domain->Idtr.Base);
-    }
-
+    SvmUnprepareDomainSpace(Domain);
     return STATUS_INSUFFICIENT_RESOURCES;
 }
 
@@ -199,39 +196,6 @@ SvmAllocateDomain(
     }
 
     return Domain;
-}
-
-ULONG NTAPI
-SvmGetFeatures()
-{
-    ULONG Feature = 0;
-    CPU_INFO CpuInfo;
-    ULONGLONG Value;
-
-    __ins_cpuidex(0x80000001, 0, &CpuInfo.Eax);
-    if (0 != (0x00000004 & CpuInfo.Ecx)) {
-        Feature |= SVM_FEATURE_SUPPORT;
-    }
-
-    Value = __ins_rdmsr(MSR_VM_CR);
-    if (0 == (0x00000010 & Value)) {
-        Feature |= SVM_FEATURE_ENABLE;
-    }
-
-    __ins_cpuidex(0x8000000A, 0, &CpuInfo.Eax);
-    if (0 != (0x00000001 & CpuInfo.Edx)) {
-        Feature |= SVM_FEATURE_NPT;
-    }
-
-    if (0 != (0x00000020 & CpuInfo.Edx)) {
-        Feature |= SVM_FEATURE_VMCB_CLEAN;
-    }
-
-    if (0 != (0x00000040 & CpuInfo.Edx)) {
-        Feature |= SVM_FEATURE_FLUSH_BY_ASID;
-    }
-
-    return Feature;
 }
 
 NTSTATUS NTAPI

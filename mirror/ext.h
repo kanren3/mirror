@@ -5,11 +5,11 @@
 extern "C" {
 #endif
 
-#define PtrToUlongPtr() ((ULONG_PTR)(p))
-#define UlongPtrToPtr() ((PVOID)(p))
+#define PtrToUlongPtr(p) ((ULONG_PTR)(p))
+#define UlongPtrToPtr(p) ((PVOID)(p))
 
-#define PtrToUlong64() ((ULONGLONG)(p))
-#define Ulong64ToPtr() ((PVOID)(p))
+#define PtrToUlong64(p) ((ULONGLONG)(p))
+#define Ulong64ToPtr(p) ((PVOID)(p))
 
 BOOLEAN NTAPI
 KeAlertThread(
