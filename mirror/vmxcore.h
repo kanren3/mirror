@@ -5,9 +5,18 @@
 extern "C" {
 #endif
 
+#define VMX_FEATURE_SUPPORT       0x00000001
+#define VMX_FEATURE_ENABLE        0x00000002
+
+typedef struct _VMX_REGION {
+    ULONG Identifier;
+    ULONG Abort;
+    UCHAR Data[PAGE_SIZE - 8];
+} VMX_REGION, *PVMX_REGION;
+
 typedef struct _VMX_DOMAIN {
-    PUCHAR Vmon;
-    PUCHAR Vmcs;
+    PVMX_REGION Vmon;
+    PVMX_REGION Vmcs;
     PUCHAR VmmStack;
     PUCHAR MsrBitmap;
     PUCHAR IoBitmap;

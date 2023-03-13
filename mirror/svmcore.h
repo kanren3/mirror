@@ -5,6 +5,12 @@
 extern "C" {
 #endif
 
+#define SVM_FEATURE_SUPPORT       0x00000001
+#define SVM_FEATURE_ENABLE        0x00000002
+#define SVM_FEATURE_NPT           0x00000004
+#define SVM_FEATURE_VMCB_CLEAN    0x00000008
+#define SVM_FEATURE_FLUSH_BY_ASID 0x00000010
+
 typedef struct _SVM_DOMAIN {
     PUCHAR Vmcb;
     PUCHAR Vmhs;

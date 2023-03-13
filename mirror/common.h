@@ -27,8 +27,28 @@ CmGetDirectoryTableBase(
 
 NTSTATUS NTAPI
 CmBuildPageDirectory(
-    __out PVOID DirectoryPointer
-);
+    __out PVOID DirectoryPointer);
+
+VOID WINAPI
+CmBuildI386GdtEntry(
+    __out PVOID Gdt,
+    __in ULONG Selector,
+    __in ULONG Base,
+    __in ULONG Limit,
+    __in ULONG Type,
+    __in ULONG Dpl,
+    __in BOOLEAN DefaultBig);
+
+VOID WINAPI
+CmBuildAmd64GdtEntry(
+    __out PVOID Gdt,
+    __in ULONG Selector,
+    __in ULONGLONG Base,
+    __in ULONG Limit,
+    __in ULONG Type,
+    __in ULONG Dpl,
+    __in BOOLEAN LongMode,
+    __in BOOLEAN DefaultBig);
 
 #ifdef __cplusplus
 }

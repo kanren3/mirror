@@ -1,6 +1,7 @@
 #include "idefs.h"
 #include "common.h"
 #include "logger.h"
+#include "features.h"
 #include "svmcore.h"
 #include "thunk.h"
 
@@ -75,25 +76,25 @@ SvmPrepareDomainSpace(
         goto Cleanup;
     }
 
-    Domain->VmmStack = CmAllocateNonPagedMemory(PAGE_SIZE);
+    Domain->VmmStack = CmAllocateNonPagedMemory(KERNEL_LARGE_STACK_SIZE);
 
     if (NULL == Domain->VmmStack) {
         goto Cleanup;
     }
 
-    Domain->Tss = CmAllocateNonPagedMemory(PAGE_SIZE);
+    Domain->Tss = CmAllocateNonPagedMemory(sizeof(KTSS));
 
     if (NULL == Domain->Tss) {
         goto Cleanup;
     }
 
-    Domain->XSaveArea = CmAllocateNonPagedMemory(PAGE_SIZE);
+    Domain->XSaveArea = CmAllocateNonPagedMemory(FeaGetXFeatureSupportedSizeMax());
 
     if (NULL == Domain->XSaveArea) {
         goto Cleanup;
     }
 
-    Domain->Gdtr.Base = CmAllocateNonPagedMemory(PAGE_SIZE);
+    Domain->Gdtr.Base = CmAllocateNonPagedMemory(VGDT_LAST);
 
     if (NULL == Domain->Gdtr.Base) {
         goto Cleanup;
@@ -200,12 +201,52 @@ SvmAllocateDomain(
     return Domain;
 }
 
+ULONG NTAPI
+SvmGetFeatures()
+{
+    ULONG Feature = 0;
+    CPU_INFO CpuInfo;
+    ULONGLONG Value;
+
+    __ins_cpuidex(0x80000001, 0, &CpuInfo.Eax);
+    if (0 != (0x00000004 & CpuInfo.Ecx)) {
+        Feature |= SVM_FEATURE_SUPPORT;
+    }
+
+    Value = __ins_rdmsr(MSR_VM_CR);
+    if (0 == (0x00000010 & Value)) {
+        Feature |= SVM_FEATURE_ENABLE;
+    }
+
+    __ins_cpuidex(0x8000000A, 0, &CpuInfo.Eax);
+    if (0 != (0x00000001 & CpuInfo.Edx)) {
+        Feature |= SVM_FEATURE_NPT;
+    }
+
+    if (0 != (0x00000020 & CpuInfo.Edx)) {
+        Feature |= SVM_FEATURE_VMCB_CLEAN;
+    }
+
+    if (0 != (0x00000040 & CpuInfo.Edx)) {
+        Feature |= SVM_FEATURE_FLUSH_BY_ASID;
+    }
+
+    return Feature;
+}
+
 NTSTATUS NTAPI
 SvmFirstEntry(
     __in PSVM_DOMAIN Domain,
     __in PGUEST_CONTEXT Context
 )
 {
+    Domain->Features = SvmGetFeatures();
+
+    if (0 == (Domain->Features & SVM_FEATURE_SUPPORT) ||
+        0 == (Domain->Features & SVM_FEATURE_ENABLE)) {
+        return STATUS_NOT_SUPPORTED;
+    }
+    
     return STATUS_SUCCESS;
 }
 

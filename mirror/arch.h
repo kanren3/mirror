@@ -4,11 +4,64 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#ifndef _WIN64
+#define VGDT_NULL         (0 * 8)
+#define VGDT_CODE         (1 * 8)
+#define VGDT_DATA         (2 * 8)
+#define VGDT_TSS          (3 * 8)
+#define VGDT_LAST         (4 * 8)
+#else
+#define VGDT_NULL         (0 * 16)
+#define VGDT_CODE         (1 * 16)
+#define VGDT_DATA         (1 * 16) + 8
+#define VGDT_TSS          (2 * 16)
+#define VGDT_LAST         (3 * 16)
+#endif
 
-#define MSR_FEATURE_CONTROL         0x0000003A      // Only Intel
-#define MSR_VMX_BASIC               0x00000480      // Only Intel
-#define MSR_EFER                    0xC0000080      
-#define MSR_VM_CR                   0xC0010114      // Only AMD
+#define TYPE_CODE       0x1A
+#define TYPE_DATA       0x12
+#define TYPE_TSS        0x09
+
+#define GRANULARITY_BYTE 0
+#define GRANULARITY_PAGE 1
+
+#define DPL_USER    3
+#define DPL_SYSTEM  0
+
+#define MSR_FEATURE_CONTROL             0x0000003A  // only intel
+#define MSR_SYSENTER_CS                 0x00000174
+#define MSR_SYSENTER_ESP                0x00000175
+#define MSR_SYSENTER_EIP                0x00000176
+#define MSR_DEBUGCTL                    0x000001D9
+#define MSR_PAT                         0x00000277
+#define MSR_VMX_BASIC                   0x00000480  // only intel
+#define MSR_VMX_PINBASED_CTLS           0x00000481  // only intel
+#define MSR_VMX_PROCBASED_CTLS          0x00000482  // only intel
+#define MSR_VMX_EXIT_CTLS               0x00000483  // only intel
+#define MSR_VMX_ENTRY_CTLS              0x00000484  // only intel
+#define MSR_VMX_MISC                    0x00000485  // only intel
+#define MSR_VMX_CR0_FIXED0              0x00000486  // only intel
+#define MSR_VMX_CR0_FIXED1              0x00000487  // only intel
+#define MSR_VMX_CR4_FIXED0              0x00000488  // only intel
+#define MSR_VMX_CR4_FIXED1              0x00000489  // only intel
+#define MSR_VMX_VMCS_ENUM               0x0000048A  // only intel
+#define MSR_VMX_SECONDARY_CTLS          0x0000048B  // only intel
+#define MSR_VMX_SECONDARY_CTLS          0x0000048B  // only intel
+#define MSR_VMX_EPT_VPID_CAP            0x0000048C  // only intel
+#define MSR_VMX_TRUE_PINBASED_CTLS      0x0000048D  // only intel
+#define MSR_VMX_TRUE_PROCBASED_CTLS     0x0000048E  // only intel
+#define MSR_VMX_TRUE_EXIT_CTLS          0x0000048F  // only intel
+#define MSR_VMX_TRUE_ENTRY_CTLS         0x00000490  // only intel
+#define MSR_EFER                        0xC0000080
+#define MSR_STAR                        0xC0000081
+#define MSR_LSTAR                       0xC0000082
+#define MSR_CSTAR                       0xC0000083
+#define MSR_SFMASK                      0xC0000084
+#define MSR_FS_BASE                     0xC0000100
+#define MSR_GS_BASE                     0xC0000101
+#define MSR_KERNEL_GS_BASE              0xC0000102
+#define MSR_VM_CR                       0xC0010114  // only amd
+#define MSR_VM_HSAVE_PA		            0xC0010117  // only amd
 
 typedef struct _CPU_INFO {
     ULONG Eax;
@@ -17,12 +70,149 @@ typedef struct _CPU_INFO {
     ULONG Edx;
 } CPU_INFO, *PCPU_INFO;
 
+typedef union _KGDT_LIMIT {
+    ULONG Limit;
+    struct {
+        USHORT LimitLow;
+        UCHAR LimitHigh;
+    };
+} KGDT_LIMIT, *PKGDT_LIMIT;
+
+typedef union _KGDT_BASE {
+    ULONG_PTR Base;
+    struct {
+        USHORT BaseLow;
+        UCHAR BaseMiddle;
+        UCHAR BaseHigh;
+#ifdef _WIN64
+        ULONG BaseUpper;
+#endif
+    };
+} KGDT_BASE, *PKGDT_BASE;
+
+typedef struct _KGDTENTRY32 {
+    USHORT LimitLow;
+    USHORT BaseLow;
+
+    union {
+        struct {
+            UCHAR BaseMiddle;
+            UCHAR Flags1;
+            UCHAR Flags2;
+            UCHAR BaseHigh;
+        } Bytes;
+
+        struct {
+            ULONG BaseMiddle : 8;
+            ULONG Type : 5;
+            ULONG Dpl : 2;
+            ULONG Present : 1;
+            ULONG LimitHigh : 4;
+            ULONG System : 1;
+            ULONG NOTHING : 1;
+            ULONG DefaultBig : 1;
+            ULONG Granularity : 1;
+            ULONG BaseHigh : 8;
+        } Bits;
+    };
+} KGDTENTRY32, *PKGDTENTRY32;
+
+typedef union _KGDTENTRY64 {
+    struct {
+        USHORT LimitLow;
+        USHORT BaseLow;
+
+        union {
+            struct {
+                UCHAR BaseMiddle;
+                UCHAR Flags1;
+                UCHAR Flags2;
+                UCHAR BaseHigh;
+            } Bytes;
+
+            struct {
+                UCHAR BaseMiddle : 8;
+                UCHAR Type : 5;
+                UCHAR Dpl : 2;
+                UCHAR Present : 1;
+                UCHAR LimitHigh : 4;
+                UCHAR System : 1;
+                UCHAR LongMode : 1;
+                UCHAR DefaultBig : 1;
+                UCHAR Granularity : 1;
+                UCHAR BaseHigh : 8;
+            } Bits;
+        };
+
+        ULONG BaseUpper;
+        ULONG MustBeZero;
+    };
+
+    ULONG64 Alignment;
+} KGDTENTRY64, *PKGDTENTRY64;
+
 #ifndef _WIN64
 typedef struct _KDESCRIPTOR {
     USHORT Pad;
     USHORT Limit;
     PUCHAR Base;
 } KDESCRIPTOR, *PKDESCRIPTOR;
+
+typedef struct _KTSS {
+
+    USHORT Backlink;
+    USHORT NOTHING : 16;
+
+    ULONG  Esp0;
+    USHORT Ss0;
+    USHORT NOTHING : 16;
+
+    ULONG  Esp1;
+    USHORT Ss1;
+    USHORT NOTHING : 16;
+
+    ULONG  Esp2;
+    USHORT Ss2;
+    USHORT NOTHING : 16;
+
+    ULONG CR3;
+    ULONG Eip;
+    ULONG EFlags;
+    ULONG Eax;
+    ULONG Ecx;
+    ULONG Edx;
+    ULONG Ebx;
+    ULONG Esp;
+    ULONG Ebp;
+    ULONG Esi;
+    ULONG Edi;
+
+    USHORT Es;
+    USHORT NOTHING : 16;
+
+    USHORT Cs;
+    USHORT NOTHING : 16;
+
+    USHORT Ss;
+    USHORT NOTHING : 16;
+
+    USHORT Ds;
+    USHORT NOTHING : 16;
+
+    USHORT Fs;
+    USHORT NOTHING : 16;
+
+    USHORT Gs;
+    USHORT NOTHING : 16;
+
+    USHORT LDT;
+    USHORT NOTHING : 16;
+
+    USHORT Flags;
+    USHORT IoMapBase;
+
+    ULONG ShadowStack;
+} KTSS, *PKTSS;
 
 typedef struct _GUEST_CONTEXT {
     union {
@@ -169,12 +359,45 @@ typedef struct _KDESCRIPTOR {
     PUCHAR Base;
 } KDESCRIPTOR, *PKDESCRIPTOR;
 
+#pragma pack(push, 4)
+typedef struct _KTSS {
+    ULONG NOTHING : 32;
+
+    ULONGLONG Rsp0;
+    ULONGLONG Rsp1;
+    ULONGLONG Rsp2;
+
+    ULONG NOTHING : 32;
+    ULONG NOTHING : 32;
+
+    union {
+        struct {
+            ULONGLONG Ist1;
+            ULONGLONG Ist2;
+            ULONGLONG Ist3;
+            ULONGLONG Ist4;
+            ULONGLONG Ist5;
+            ULONGLONG Ist6;
+            ULONGLONG Ist7;
+        };
+
+        ULONGLONG Ist[7];
+    };
+
+    ULONG NOTHING : 32;
+    ULONG NOTHING : 32;
+
+    USHORT NOTHING : 16;
+    USHORT IoMapBase;
+} KTSS, *PKTSS;
+#pragma pack(pop)
+
 typedef struct DECLSPEC_ALIGN(16) _GUEST_CONTEXT {
     union {
-        ULONG64 GPR[16];
+        ULONGLONG GPR[16];
         struct {
             union {
-                ULONG64 Rax;
+                ULONGLONG Rax;
                 ULONG Eax;
                 USHORT Ax;
                 struct {
@@ -184,7 +407,7 @@ typedef struct DECLSPEC_ALIGN(16) _GUEST_CONTEXT {
             };
 
             union {
-                ULONG64 Rcx;
+                ULONGLONG Rcx;
                 ULONG Ecx;
                 USHORT Cx;
                 struct {
@@ -194,7 +417,7 @@ typedef struct DECLSPEC_ALIGN(16) _GUEST_CONTEXT {
             };
 
             union {
-                ULONG64 Rdx;
+                ULONGLONG Rdx;
                 ULONG Edx;
                 USHORT Dx;
                 struct {
@@ -204,7 +427,7 @@ typedef struct DECLSPEC_ALIGN(16) _GUEST_CONTEXT {
             };
 
             union {
-                ULONG64 Rbx;
+                ULONGLONG Rbx;
                 ULONG Ebx;
                 USHORT Bx;
                 struct {
@@ -214,84 +437,84 @@ typedef struct DECLSPEC_ALIGN(16) _GUEST_CONTEXT {
             };
 
             union {
-                ULONG64 Rsp;
+                ULONGLONG Rsp;
                 ULONG Esp;
                 USHORT Sp;
                 UCHAR Spl;
             };
 
             union {
-                ULONG64 Rbp;
+                ULONGLONG Rbp;
                 ULONG Ebp;
                 USHORT Bp;
                 UCHAR Bpl;
             };
 
             union {
-                ULONG64 Rsi;
+                ULONGLONG Rsi;
                 ULONG Esi;
                 USHORT Si;
                 UCHAR Sil;
             };
 
             union {
-                ULONG64 Rdi;
+                ULONGLONG Rdi;
                 ULONG Edi;
                 USHORT Di;
                 UCHAR Dil;
             };
 
             union {
-                ULONG64 R8;
+                ULONGLONG R8;
                 ULONG R8d;
                 USHORT R8w;
                 UCHAR R8b;
             };
 
             union {
-                ULONG64 R9;
+                ULONGLONG R9;
                 ULONG R9d;
                 USHORT R9w;
                 UCHAR R9b;
             };
 
             union {
-                ULONG64 R10;
+                ULONGLONG R10;
                 ULONG R10d;
                 USHORT R10w;
                 UCHAR R10b;
             };
 
             union {
-                ULONG64 R11;
+                ULONGLONG R11;
                 ULONG R11d;
                 USHORT R11w;
                 UCHAR R11b;
             };
 
             union {
-                ULONG64 R12;
+                ULONGLONG R12;
                 ULONG R12d;
                 USHORT R12w;
                 UCHAR R12b;
             };
 
             union {
-                ULONG64 R13;
+                ULONGLONG R13;
                 ULONG R13d;
                 USHORT R13w;
                 UCHAR R13b;
             };
 
             union {
-                ULONG64 R14;
+                ULONGLONG R14;
                 ULONG R14d;
                 USHORT R14w;
                 UCHAR R14b;
             };
 
             union {
-                ULONG64 R15;
+                ULONGLONG R15;
                 ULONG R15d;
                 USHORT R15w;
                 UCHAR R15b;
@@ -299,10 +522,10 @@ typedef struct DECLSPEC_ALIGN(16) _GUEST_CONTEXT {
         };
     };
 
-    ULONG64 Rip;
+    ULONGLONG Rip;
 
     union {
-        ULONG64 RFlags;
+        ULONGLONG RFlags;
         ULONG EFlags;
     };
 
@@ -319,31 +542,31 @@ typedef struct DECLSPEC_ALIGN(16) _GUEST_CONTEXT {
     KDESCRIPTOR Idtr;
 
     union {
-        ULONG64 CR[9];
+        ULONGLONG CR[9];
         struct {
-            ULONG64 Cr0;
-            ULONG64 NOTHING : 64;
-            ULONG64 Cr2;
-            ULONG64 Cr3;
-            ULONG64 Cr4;
-            ULONG64 NOTHING : 64;
-            ULONG64 NOTHING : 64;
-            ULONG64 NOTHING : 64;
-            ULONG64 Cr8;
+            ULONGLONG Cr0;
+            ULONGLONG NOTHING : 64;
+            ULONGLONG Cr2;
+            ULONGLONG Cr3;
+            ULONGLONG Cr4;
+            ULONGLONG NOTHING : 64;
+            ULONGLONG NOTHING : 64;
+            ULONGLONG NOTHING : 64;
+            ULONGLONG Cr8;
         };
     };
 
     union {
-        ULONG64 DR[8];
+        ULONGLONG DR[8];
         struct {
-            ULONG64 Dr0;
-            ULONG64 Dr1;
-            ULONG64 Dr2;
-            ULONG64 Dr3;
-            ULONG64 NOTHING : 64;
-            ULONG64 NOTHING : 64;
-            ULONG64 Dr6;
-            ULONG64 Dr7;
+            ULONGLONG Dr0;
+            ULONGLONG Dr1;
+            ULONGLONG Dr2;
+            ULONGLONG Dr3;
+            ULONGLONG NOTHING : 64;
+            ULONGLONG NOTHING : 64;
+            ULONGLONG Dr6;
+            ULONGLONG Dr7;
         };
     };
 

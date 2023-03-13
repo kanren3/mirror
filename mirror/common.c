@@ -100,3 +100,95 @@ CmBuildPageDirectory(
 
     return STATUS_SUCCESS;
 }
+
+VOID WINAPI
+CmBuildI386GdtEntry(
+    __out PVOID Gdt,
+    __in ULONG Selector,
+    __in ULONG Base,
+    __in ULONG Limit,
+    __in ULONG Type,
+    __in ULONG Dpl,
+    __in BOOLEAN DefaultBig
+)
+{
+    PKGDTENTRY32 GdtEntry;
+    KGDT_BASE GdtBase;
+    KGDT_LIMIT GdtLimit;
+
+    GdtEntry = (PKGDTENTRY32)((PUCHAR)Gdt + (Selector & ~7));
+
+    GdtBase.Base = Base;
+    GdtEntry->BaseLow = GdtBase.BaseLow;
+    GdtEntry->Bits.BaseMiddle = GdtBase.BaseMiddle;
+    GdtEntry->Bits.BaseHigh = GdtBase.BaseHigh;
+
+    if (Limit > (1 << 20)) {
+        GdtLimit.Limit = Limit / 0x1000;
+        GdtEntry->Bits.Granularity = 1;
+    }
+    else {
+        GdtLimit.Limit = (ULONG)Limit;
+        GdtEntry->Bits.Granularity = 0;
+    }
+
+    GdtEntry->LimitLow = GdtLimit.LimitLow;
+    GdtEntry->Bits.LimitHigh = GdtLimit.LimitHigh;
+
+    GdtEntry->Bits.Present = 1;
+    GdtEntry->Bits.Type = Type;
+    GdtEntry->Bits.Dpl = Dpl;
+    GdtEntry->Bits.DefaultBig = DefaultBig;
+    GdtEntry->Bits.System = 0;
+}
+
+VOID WINAPI
+CmBuildAmd64GdtEntry(
+    __out PVOID Gdt,
+    __in ULONG Selector,
+    __in ULONGLONG Base,
+    __in ULONG Limit,
+    __in ULONG Type,
+    __in ULONG Dpl,
+    __in BOOLEAN LongMode,
+    __in BOOLEAN DefaultBig
+)
+{
+    PKGDTENTRY64 GdtEntry;
+    KGDT_BASE GdtBase;
+    KGDT_LIMIT GdtLimit;
+
+    GdtEntry = (PKGDTENTRY64)((PUCHAR)Gdt + (Selector & ~7));
+
+    GdtBase.Base = Base;
+    GdtEntry->BaseLow = GdtBase.BaseLow;
+    GdtEntry->Bits.BaseMiddle = GdtBase.BaseMiddle;
+    GdtEntry->Bits.BaseHigh = GdtBase.BaseHigh;
+
+    if (FALSE != LongMode) {
+        GdtEntry->MustBeZero = 0;
+        GdtEntry->BaseUpper = GdtBase.BaseUpper;
+        GdtEntry->Bits.LongMode = 1;
+    }
+    else {
+        GdtEntry->Bits.LongMode = 0;
+    }
+
+    if (Limit > (1 << 20)) {
+        GdtLimit.Limit = Limit / 0x1000;
+        GdtEntry->Bits.Granularity = 1;
+    }
+    else {
+        GdtLimit.Limit = (ULONG)Limit;
+        GdtEntry->Bits.Granularity = 0;
+    }
+
+    GdtEntry->LimitLow = GdtLimit.LimitLow;
+    GdtEntry->Bits.LimitHigh = GdtLimit.LimitHigh;
+
+    GdtEntry->Bits.Present = 1;
+    GdtEntry->Bits.Type = Type;
+    GdtEntry->Bits.Dpl = Dpl;
+    GdtEntry->Bits.DefaultBig = DefaultBig;
+    GdtEntry->Bits.System = 0;
+}

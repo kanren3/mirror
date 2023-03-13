@@ -143,7 +143,7 @@ extern "C" {
     *(PULONG)(Value) = *(PULONG)((PUCHAR)(Vmcb) + Offset)
 
 #define __svm_read64(Vmcb, Offset, Value) \
-    *(PULONG64)(Value) = *(PULONG64)((PUCHAR)(Vmcb) + Offset)
+    *(PULONGLONG)(Value) = *(PULONGLONG)((PUCHAR)(Vmcb) + Offset)
 
 #define __svm_read_ptr(Vmcb, Offset, Value) \
     *(PULONG_PTR)(Value) = *(PULONG_PTR)((PUCHAR)(Vmcb) + Offset)
@@ -158,7 +158,7 @@ extern "C" {
     *(PULONG)((PUCHAR)(Vmcb) + Offset) = (ULONG)(Value)
 
 #define __svm_write64(Vmcb, Offset, Value) \
-    *(PULONG64)((PUCHAR)(Vmcb) + Offset) = (ULONG64)(Value)
+    *(PULONGLONG)((PUCHAR)(Vmcb) + Offset) = (ULONGLONG)(Value)
 
 #define __svm_write_ptr(Vmcb, Offset, Value) \
     *(PULONG_PTR)((PUCHAR)(Vmcb) + Offset) = (ULONG_PTR)(Value)

@@ -1,8 +1,11 @@
 #include "idefs.h"
 #include "common.h"
 #include "logger.h"
+#include "features.h"
 #include "vmxcore.h"
 #include "thunk.h"
+
+extern PVOID TuPageDirectoryPointer;
 
 VOID NTAPI
 VmxUnprepareDomainSpace(
@@ -51,49 +54,49 @@ VmxPrepareDomainSpace(
     __in PVMX_DOMAIN Domain
 )
 {
-    Domain->Vmon = CmAllocateContiguousMemory(PAGE_SIZE);
+    Domain->Vmon = CmAllocateContiguousMemory(sizeof(VMX_REGION));
 
     if (NULL == Domain->Vmon) {
         goto Cleanup;
     }
 
-    Domain->Vmcs = CmAllocateContiguousMemory(PAGE_SIZE);
+    Domain->Vmcs = CmAllocateContiguousMemory(sizeof(VMX_REGION));
 
     if (NULL == Domain->Vmcs) {
         goto Cleanup;
     }
 
-    Domain->MsrBitmap = CmAllocateContiguousMemory(PAGE_SIZE * 2);
+    Domain->MsrBitmap = CmAllocateContiguousMemory(PAGE_SIZE);
 
     if (NULL == Domain->MsrBitmap) {
         goto Cleanup;
     }
 
-    Domain->IoBitmap = CmAllocateContiguousMemory(PAGE_SIZE * 2);
+    Domain->IoBitmap = CmAllocateContiguousMemory(PAGE_SIZE);
 
     if (NULL == Domain->IoBitmap) {
         goto Cleanup;
     }
 
-    Domain->VmmStack = CmAllocateNonPagedMemory(PAGE_SIZE);
+    Domain->VmmStack = CmAllocateNonPagedMemory(KERNEL_LARGE_STACK_SIZE);
 
     if (NULL == Domain->VmmStack) {
         goto Cleanup;
     }
 
-    Domain->Tss = CmAllocateNonPagedMemory(PAGE_SIZE);
+    Domain->Tss = CmAllocateNonPagedMemory(sizeof(KTSS));
 
     if (NULL == Domain->Tss) {
         goto Cleanup;
     }
 
-    Domain->XSaveArea = CmAllocateNonPagedMemory(PAGE_SIZE);
+    Domain->XSaveArea = CmAllocateNonPagedMemory(FeaGetXFeatureSupportedSizeMax());
 
     if (NULL == Domain->XSaveArea) {
         goto Cleanup;
     }
 
-    Domain->Gdtr.Base = CmAllocateNonPagedMemory(PAGE_SIZE);
+    Domain->Gdtr.Base = CmAllocateNonPagedMemory(VGDT_LAST);
 
     if (NULL == Domain->Gdtr.Base) {
         goto Cleanup;
@@ -200,13 +203,118 @@ VmxAllocateDomain(
     return Domain;
 }
 
+VOID NTAPI
+VmxPrepareGdtEntry(
+    __in PVMX_DOMAIN Domain
+)
+{
+#ifndef _WIN64
+    
+#else
+    CmBuildAmd64GdtEntry(Domain->Gdtr.Base, VGDT_NULL, 0, 0, 0, 0, FALSE, FALSE);
+    CmBuildAmd64GdtEntry(Domain->Gdtr.Base, VGDT_CODE, 0, 0, TYPE_CODE, DPL_SYSTEM, TRUE, TRUE);
+    CmBuildAmd64GdtEntry(Domain->Gdtr.Base, VGDT_DATA, 0, 0, TYPE_DATA, DPL_SYSTEM, FALSE, TRUE);
+    CmBuildAmd64GdtEntry(Domain->Gdtr.Base, VGDT_TSS, 0, 0, TYPE_TSS64, DPL_SYSTEM, FALSE, TRUE);
+
+    
+#endif
+}
+
+VOID NTAPI
+VmxPrepareIdtEntry()
+{
+
+}
+
+ULONG NTAPI
+VmxGetFeatures()
+{
+    ULONG Feature = 0;
+    CPU_INFO CpuInfo;
+    ULONGLONG Value;
+
+    __ins_cpuidex(0x00000001, 0, &CpuInfo.Eax);
+    if (0 != (0x00000020 & CpuInfo.Ecx)) {
+        Feature |= VMX_FEATURE_SUPPORT;
+    }
+
+    Value = __ins_rdmsr(MSR_FEATURE_CONTROL);
+    if (0 != (0x00000004 & Value)) {
+        Feature |= VMX_FEATURE_ENABLE;
+    }
+
+    return TRUE;
+}
+
 NTSTATUS NTAPI
 VmxFirstEntry(
     __in PVMX_DOMAIN Domain,
     __in PGUEST_CONTEXT Context
 )
 {
-    return STATUS_SUCCESS;
+    PHYSICAL_ADDRESS PageDirectoryBase;
+    PHYSICAL_ADDRESS VmonPa;
+    PHYSICAL_ADDRESS VmcsPa;
+
+    Domain->Features = VmxGetFeatures();
+
+    if (0 == (Domain->Features & VMX_FEATURE_SUPPORT) ||
+        0 == (Domain->Features & VMX_FEATURE_ENABLE)) {
+        return STATUS_NOT_SUPPORTED;
+    }
+
+    Domain->BasicInfo.Value = __ins_rdmsr(MSR_VMX_BASIC);
+
+    Domain->Vmon->Identifier = Domain->BasicInfo.Identifier;
+    Domain->Vmcs->Identifier = Domain->BasicInfo.Identifier;
+
+    if (0 == Domain->BasicInfo.TrueCtls) {
+        Domain->PinFixed.QuadPart = __ins_rdmsr(MSR_VMX_PINBASED_CTLS);
+        Domain->PrimaryFixed.QuadPart = __ins_rdmsr(MSR_VMX_PROCBASED_CTLS);
+        Domain->SecondaryFixed.QuadPart = __ins_rdmsr(MSR_VMX_SECONDARY_CTLS);
+        Domain->ExitFixed.QuadPart = __ins_rdmsr(MSR_VMX_EXIT_CTLS);
+        Domain->EntryFixed.QuadPart = __ins_rdmsr(MSR_VMX_ENTRY_CTLS);
+    }
+    else {
+        Domain->PinFixed.QuadPart = __ins_rdmsr(MSR_VMX_TRUE_PINBASED_CTLS);
+        Domain->PrimaryFixed.QuadPart = __ins_rdmsr(MSR_VMX_TRUE_PROCBASED_CTLS);
+        Domain->SecondaryFixed.QuadPart = __ins_rdmsr(MSR_VMX_SECONDARY_CTLS);
+        Domain->ExitFixed.QuadPart = __ins_rdmsr(MSR_VMX_TRUE_EXIT_CTLS);
+        Domain->EntryFixed.QuadPart = __ins_rdmsr(MSR_VMX_TRUE_ENTRY_CTLS);
+    }
+
+    Domain->Cr0 = Context->Cr0;
+    Domain->Cr0 &= __ins_rdmsr(MSR_VMX_CR0_FIXED1);
+    Domain->Cr0 |= __ins_rdmsr(MSR_VMX_CR0_FIXED0);
+
+    PageDirectoryBase = MmGetPhysicalAddress(TuPageDirectoryPointer);
+
+#ifndef _WIN64
+    Domain->Cr3 = PageDirectoryBase.LowPart;
+#else
+    Domain->Cr3 = PageDirectoryBase.QuadPart;
+#endif
+
+    Domain->Cr4 = Context->Cr4;
+    Domain->Cr4 &= __ins_rdmsr(MSR_VMX_CR4_FIXED1);
+    Domain->Cr4 |= __ins_rdmsr(MSR_VMX_CR4_FIXED0);
+
+    __ins_writecr(0, Domain->Cr0);
+    __ins_writecr(4, Domain->Cr4);
+
+    VmonPa = MmGetPhysicalAddress(Domain->Vmon);
+    VmcsPa = MmGetPhysicalAddress(Domain->Vmcs);
+
+    __ins_vmxon(&VmonPa.QuadPart);
+    __ins_vmclear(&VmcsPa.QuadPart);
+    __ins_vmptrld(&VmcsPa.QuadPart);
+
+    __ins_vmlaunch();
+    __ins_vmxoff();
+
+    __ins_writecr(4, Domain->Cr4);
+    __ins_writecr(0, Domain->Cr0);
+    return STATUS_UNSUCCESSFUL;
 }
 
 NTSTATUS NTAPI
